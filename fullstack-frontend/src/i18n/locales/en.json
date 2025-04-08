@@ -1,0 +1,104 @@
+{
+    "greeting": "Hello!",
+    "navbar": {
+        "logo": "Marketplace",
+        "home": "Home",
+        "categories": "Categories",
+        "favorites": "Favorites",
+        "messages": "Messages",
+        "myProfile": "My Profile",
+        "logout": "Logout",
+        "login": "Login",
+        "register": "Register",
+        "language": "Language"
+    },
+    "logout": {
+        "success": "You have been logged out successfully.",
+        "error": "An error occurred while logging out."
+    },
+    "loginForm": {
+        "emailLabel": "Email",
+        "emailPlaceholder": "Enter your email",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Enter your password",
+        "loginButton": "Login",
+        "errorDefault": "Login failed. Please try again.",
+        "errorUnexpected": "An unexpected error occurred."
+    },
+    "registerForm": {
+        "fullNameLabel": "Full Name",
+        "fullNamePlaceholder": "Enter your full name",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Enter your email",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Create a password",
+        "confirmPasswordLabel": "Confirm Password",
+        "confirmPasswordPlaceholder": "Confirm your password",
+        "registerButton": "Register",
+        "alreadyHaveAccount": "Already have an account? ",
+        "errorPasswordMismatch": "Passwords do not match",
+        "successMessage": "Registration successful",
+        "errorDefault": "Registration failed. Please try again."
+    },
+    "userProfile": {
+        "welcome": "Welcome, {userName}",
+        "emailPrefix": "Email: ",
+        "settingsButton": "Settings",
+        "createItemButton": "Create Item",
+        "errorNoToken": "No authentication token found"
+    },
+    "createItemForm": {
+        "errorNotLoggedIn": "You are not logged in. Please log in again.",
+        "successMessage": "Item created successfully!",
+        "errorDefault": "Failed to create item. Please try again.",
+        "title": "Create New Item",
+        "nameLabel": "Item Name:",
+        "descriptionLabel": "Description:",
+        "priceLabel": "Price:",
+        "categoryLabel": "Category:",
+        "categorySelectDefault": "Select a category",
+        "categoryElectronics": "Electronics",
+        "categoryClothing": "Clothing",
+        "categoryHome": "Home",
+        "categoryToys": "Toys"
+    },
+    "userSettings": {
+        "title": "User Settings",
+        "nameLabel": "Name",
+        "namePlaceholder": "Enter your new name",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Enter your new email",
+        "newPasswordLabel": "New Password",
+        "newPasswordPlaceholder": "Enter your new password",
+        "confirmNewPasswordLabel": "Confirm New Password",
+        "confirmNewPasswordPlaceholder": "Confirm your new password",
+        "saveButton": "Save Changes",
+        "successMessage": "Settings updated successfully!",
+        "errorDefault": "An error occurred while updating your settings. Please try again."
+    },
+    "homeView": {
+        "welcomeTitle": "Welcome to Marketplace"
+    },
+    "loginView": {
+        "dontHaveAccount": "Don't have an account? "
+    },
+    "categoriesView": {
+        "title": "Categories",
+        "categoryElectronicsName": "Electronics",
+        "categoryElectronicsDesc": "Electronic devices and accessories",
+        "categoryClothingName": "Clothing",
+        "categoryClothingDesc": "Fashion items and accessories",
+        "categoryHomeGardenName": "Home & Garden",
+        "categoryHomeGardenDesc": "Items for home and garden",
+        "categorySportsName": "Sports",
+        "categorySportsDesc": "Sports equipment and accessories"
+    },
+    "favoritesView": {
+        "title": "Your Favorites",
+        "emptyState": "You haven't added any items to your favorites yet."
+    },
+    "messagesView": {
+        "title": "Messages",
+        "emptyState": "You don't have any messages yet."
+    }
+}

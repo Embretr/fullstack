@@ -1,0 +1,104 @@
+{
+    "greeting": "Hallo!",
+    "navbar": {
+        "logo": "Markedsplass",
+        "home": "Hjem",
+        "categories": "Kategorier",
+        "favorites": "Favoritter",
+        "messages": "Meldinger",
+        "myProfile": "Min Profil",
+        "logout": "Logg ut",
+        "login": "Logg inn",
+        "register": "Registrer",
+        "language": "Språk"
+    },
+    "logout": {
+        "success": "Du har blitt logget ut.",
+        "error": "En feil oppstod under utlogging."
+    },
+    "loginForm": {
+        "emailLabel": "E-post",
+        "emailPlaceholder": "Skriv inn din e-post",
+        "passwordLabel": "Passord",
+        "passwordPlaceholder": "Skriv inn ditt passord",
+        "loginButton": "Logg inn",
+        "errorDefault": "Innlogging feilet. Vennligst prøv igjen.",
+        "errorUnexpected": "En uventet feil oppstod."
+    },
+    "registerForm": {
+        "fullNameLabel": "Fullt navn",
+        "fullNamePlaceholder": "Skriv inn ditt fulle navn",
+        "emailLabel": "E-post",
+        "emailPlaceholder": "Skriv inn din e-post",
+        "passwordLabel": "Passord",
+        "passwordPlaceholder": "Lag et passord",
+        "confirmPasswordLabel": "Bekreft passord",
+        "confirmPasswordPlaceholder": "Bekreft passordet ditt",
+        "registerButton": "Registrer",
+        "alreadyHaveAccount": "Har du allerede en konto? ",
+        "errorPasswordMismatch": "Passordene stemmer ikke overens",
+        "successMessage": "Registrering vellykket",
+        "errorDefault": "Registrering feilet. Vennligst prøv igjen."
+    },
+    "userProfile": {
+        "welcome": "Velkommen, {userName}",
+        "emailPrefix": "E-post: ",
+        "settingsButton": "Innstillinger",
+        "createItemButton": "Opprett gjenstand",
+        "errorNoToken": "Ingen autentiseringstoken funnet"
+    },
+    "createItemForm": {
+        "errorNotLoggedIn": "Du er ikke logget inn. Vennligst logg inn igjen.",
+        "successMessage": "Gjenstand opprettet!",
+        "errorDefault": "Kunne ikke opprette gjenstand. Vennligst prøv igjen.",
+        "title": "Opprett ny gjenstand",
+        "nameLabel": "Navn på gjenstand:",
+        "descriptionLabel": "Beskrivelse:",
+        "priceLabel": "Pris:",
+        "categoryLabel": "Kategori:",
+        "categorySelectDefault": "Velg en kategori",
+        "categoryElectronics": "Elektronikk",
+        "categoryClothing": "Klær",
+        "categoryHome": "Hjem",
+        "categoryToys": "Leker"
+    },
+    "userSettings": {
+        "title": "Brukerinnstillinger",
+        "nameLabel": "Navn",
+        "namePlaceholder": "Skriv inn ditt nye navn",
+        "emailLabel": "E-post",
+        "emailPlaceholder": "Skriv inn din nye e-post",
+        "newPasswordLabel": "Nytt passord",
+        "newPasswordPlaceholder": "Skriv inn ditt nye passord",
+        "confirmNewPasswordLabel": "Bekreft nytt passord",
+        "confirmNewPasswordPlaceholder": "Bekreft det nye passordet",
+        "saveButton": "Lagre endringer",
+        "successMessage": "Innstillinger oppdatert!",
+        "errorDefault": "En feil oppstod under oppdatering av innstillingene. Vennligst prøv igjen."
+    },
+    "homeView": {
+        "welcomeTitle": "Velkommen til Markedsplass"
+    },
+    "loginView": {
+        "dontHaveAccount": "Har du ikke en konto? "
+    },
+    "categoriesView": {
+        "title": "Kategorier",
+        "categoryElectronicsName": "Elektronikk",
+        "categoryElectronicsDesc": "Elektroniske enheter og tilbehør",
+        "categoryClothingName": "Klær",
+        "categoryClothingDesc": "Moteartikler og tilbehør",
+        "categoryHomeGardenName": "Hjem & Hage",
+        "categoryHomeGardenDesc": "Artikler for hjem og hage",
+        "categorySportsName": "Sport",
+        "categorySportsDesc": "Sportsutstyr og tilbehør"
+    },
+    "favoritesView": {
+        "title": "Dine favoritter",
+        "emptyState": "Du har ikke lagt til noen gjenstander i favoritter ennå."
+    },
+    "messagesView": {
+        "title": "Meldinger",
+        "emptyState": "Du har ingen meldinger ennå."
+    }
+}
