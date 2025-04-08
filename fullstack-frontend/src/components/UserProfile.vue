@@ -27,9 +27,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useGetUserItems } from '../api/item-management/item-management';
 import { useGetUserByEmail } from '../api/user-management/user-management';
-import type { Item, User } from '../api/model';
-import type { UseQueryReturnType } from '@tanstack/vue-query';
-import type { AxiosResponse, AxiosError } from 'axios';
+import type { Item } from '../api/model';
 
 const { t } = useI18n();
 const router = useRouter();

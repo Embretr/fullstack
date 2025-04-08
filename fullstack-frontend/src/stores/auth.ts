@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { login, register, logout, getMe } from '../api/authentication/authentication'
-import type { User as ApiUser } from '../api/model/user'
 
 interface User {
   id: number

@@ -26,9 +26,8 @@
   </template>
 
   <script setup lang="ts">
-  import { computed, onMounted } from 'vue';
+  import { computed } from 'vue';
   import { useUserStore } from '@/stores/user';
-  import axios from 'axios';
   import LoggedInNavBar from './LoggedInNavBar.vue';
   import LoggedOutNavBar from './LoggedOutNavBar.vue';
   import { useI18n } from 'vue-i18n';

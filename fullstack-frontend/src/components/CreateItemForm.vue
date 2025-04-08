@@ -13,7 +13,7 @@ const API_URL = 'http://localhost:8080/api';
 
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
-  if (target.files && target.files[0]) {
+  if (target.files?.[0]) {
     itemImage.value = target.files[0];
   }
 };
@@ -56,7 +56,11 @@ const handleSubmit = async () => {
     itemPrice.value = 0;
     itemCategory.value = '';
   } catch (error: unknown) {
-    console.error('Error creating item:', error.response?.data || error.message);
+    if (axios.isAxiosError(error)) {
+      console.error('Error creating item:', error.response?.data || error.message);
+    } else {
+      console.error('Error creating item:', error);
+    }
     alert(t('createItemForm.errorDefault'));
   }
 };
