@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from '@vue/reactivity';
-import axios from 'axios';
 import { useI18n } from 'vue-i18n';
+import { useCreateItem } from '../api/item-management/item-management';
+import type { CreateItemParams } from '../api/model';
 
 const { t } = useI18n();
 const itemName = ref('');
@@ -9,7 +10,6 @@ const itemDescription = ref('');
 const itemPrice = ref(0.0);
 const itemCategory = ref('');
 const itemImage = ref<File | null>(null);
-const API_URL = 'http://localhost:8080/api';
 
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
@@ -17,6 +17,24 @@ const handleFileChange = (event: Event) => {
     itemImage.value = target.files[0];
   }
 };
+
+const { mutate: createItemMutation } = useCreateItem({
+  mutation: {
+    onSuccess: (data) => {
+      alert(t('createItemForm.successMessage'));
+      console.log('Created item:', data.data);
+      // Clear form fields
+      itemName.value = '';
+      itemDescription.value = '';
+      itemPrice.value = 0;
+      itemCategory.value = '';
+    },
+    onError: (error) => {
+      console.error('Error creating item:', error.response?.data || error.message);
+      alert(t('createItemForm.errorDefault'));
+    }
+  }
+});
 
 const handleSubmit = async () => {
   const token = localStorage.getItem('authToken');
@@ -26,43 +44,26 @@ const handleSubmit = async () => {
     return;
   }
 
-  try {
-    const formData = new FormData();
-    formData.append('name', itemName.value);
-    formData.append('description', itemDescription.value);
-    formData.append('price', itemPrice.value.toString());
-    formData.append('category', itemCategory.value);
-    if (itemImage.value) {
-      formData.append('image', itemImage.value);
-    }
-
-    const response = await axios.post(
-      `${API_URL}/createItem`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-
-    alert(t('createItemForm.successMessage'));
-    console.log('Created item:', response.data);
-
-    // Clear form fields
-    itemName.value = '';
-    itemDescription.value = '';
-    itemPrice.value = 0;
-    itemCategory.value = '';
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error creating item:', error.response?.data || error.message);
-    } else {
-      console.error('Error creating item:', error);
-    }
-    alert(t('createItemForm.errorDefault'));
+  const formData = new FormData();
+  formData.append('name', itemName.value);
+  formData.append('description', itemDescription.value);
+  formData.append('price', itemPrice.value.toString());
+  formData.append('category', itemCategory.value);
+  if (itemImage.value) {
+    formData.append('image', itemImage.value);
   }
+
+  const params: CreateItemParams = {
+    images: itemImage.value ? [itemImage.value] : [],
+    itemData: JSON.stringify({
+      name: itemName.value,
+      description: itemDescription.value,
+      price: itemPrice.value,
+      category: itemCategory.value
+    })
+  };
+
+  createItemMutation({ params });
 };
 </script>
 

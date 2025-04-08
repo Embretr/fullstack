@@ -27,14 +27,14 @@
 
   <script setup lang="ts">
   import { computed } from 'vue';
-  import { useUserStore } from '@/stores/user';
+  import { useAuthStore } from '@/stores/auth';
   import LoggedInNavBar from './LoggedInNavBar.vue';
   import LoggedOutNavBar from './LoggedOutNavBar.vue';
   import { useI18n } from 'vue-i18n';
 
   const { locale } = useI18n();
-  const userStore = useUserStore();
-  const isLoggedIn = computed(() => userStore.isLoggedIn);
+  const authStore = useAuthStore();
+  const isLoggedIn = computed(() => authStore.isAuthenticated);
 
   
   </script>

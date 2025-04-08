@@ -26,17 +26,16 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useGetUserItems } from '../api/item-management/item-management';
-import { useGetUserByEmail } from '../api/user-management/user-management';
+import { useGetMe } from '../api/authentication/authentication';
 import type { Item } from '../api/model';
 
 const { t } = useI18n();
 const router = useRouter();
 
 // Get user data
-const { data: userData } = useGetUserByEmail('', {
+const { data: userData } = useGetMe({
   query: {
-    queryKey: ['user'],
-    enabled: false,
+    queryKey: ['currentUser'],
     staleTime: 10000, // Cache for 10 seconds
   },
 });

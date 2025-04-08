@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import { useGetAllItems } from '../api/item-management/item-management';
+import { useDeleteItem } from '../api/item-management/item-management';
+import { useGetAllCategories } from '../api/category-management/category-management';
+import { useCreateCategory } from '../api/category-management/category-management';
+import { useDeleteCategory } from '../api/category-management/category-management';
+import { useGetUserByEmail } from '../api/user-management/user-management';
+import { useMakeUserAdmin } from '../api/user-management/user-management';
+import { useRemoveAdminRole } from '../api/user-management/user-management';
+import { useDeleteUserByEmail } from '../api/user-management/user-management';
+import type { Item, Category, User } from '../api/model';
+import type { AxiosError } from 'axios';
 
 interface Item {
   id: number;
@@ -61,254 +71,162 @@ const filteredItems = computed(() => {
 });
 
 // Fetch all items
-const fetchItems = async (): Promise<void> => {
-  isLoading.value = true;
-  try {
-    const response = await axios.get<Item[]>('http://localhost:8080/api/marketplace/items');
-    items.value = response.data || [];
-  } catch (error) {
-    console.error('Error fetching items:', error);
-    errorMessage.value = 'Failed to load items. Please try again later.';
-    items.value = [];
-  } finally {
-    isLoading.value = false;
+const { data: itemsData, isLoading: itemsLoading } = useGetAllItems({
+  query: {
+    onSuccess: (data: { data: Item[] }) => {
+      items.value = data.data || [];
+    },
+    onError: (error: AxiosError) => {
+      console.error('Error fetching items:', error);
+      errorMessage.value = 'Failed to load items. Please try again later.';
+      items.value = [];
+    }
   }
-};
+});
 
 // Delete an item
+const { mutate: deleteItemMutation } = useDeleteItem({
+  mutation: {
+    onSuccess: (_, variables) => {
+      items.value = items.value.filter(item => item.id !== variables.itemId);
+    },
+    onError: (error: AxiosError) => {
+      console.error('Error deleting item:', error);
+      alert('Failed to delete item. Please try again.');
+    }
+  }
+});
+
 const deleteItem = async (itemId: number): Promise<void> => {
   if (!confirm('Are you sure you want to delete this item?')) return;
-
-  try {
-    const token = localStorage.getItem('authToken');
-    await axios.delete(`http://localhost:8080/api/marketplace/items/${itemId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    items.value = items.value.filter(item => item.id !== itemId);
-  } catch (error) {
-    console.error('Error deleting item:', error);
-    alert('Failed to delete item. Please try again.');
-  }
+  deleteItemMutation({ itemId });
 };
 
 // Fetch all categories
-const fetchCategories = async (): Promise<void> => {
-  try {
-    const response = await axios.get<Category[]>('http://localhost:8080/api/marketplace/categories');
-    categories.value = response.data || [];
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    alert('Failed to load categories. Please try again later.');
-    categories.value = [];
+const { data: categoriesData } = useGetAllCategories({
+  query: {
+    onSuccess: (data: { data: Category[] }) => {
+      categories.value = data.data || [];
+    }
   }
-};
+});
 
 // Create a new category
-const createCategory = async (): Promise<void> => {
-  if (!newCategoryName.value.trim()) {
-    alert('Category name cannot be empty.');
-    return;
+const { mutate: createCategoryMutation } = useCreateCategory({
+  mutation: {
+    onSuccess: (data: { data: Category }) => {
+      categories.value.push(data.data);
+      newCategoryName.value = '';
+    },
+    onError: (error: AxiosError) => {
+      console.error('Error creating category:', error);
+      alert('Failed to create category. Please try again.');
+    }
   }
+});
 
-  try {
-    const token = localStorage.getItem('authToken');
-    const response = await axios.put<Category>('http://localhost:8080/api/marketplace/categories', {
-      name: newCategoryName.value,
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    categories.value.push(response.data);
-    newCategoryName.value = '';
-    alert('Category created successfully.');
-  } catch (error) {
-    console.error('Error creating category:', error);
-    alert('Failed to create category. Please try again.');
-  }
+const createCategory = async (): Promise<void> => {
+  if (!newCategoryName.value.trim()) return;
+  
+  const category: Category = {
+    name: newCategoryName.value.trim()
+  };
+  
+  createCategoryMutation({ data: category });
 };
 
 // Delete a category
-const deleteCategory = async (categoryId: number): Promise<void> => {
-  if (!confirm('Are you sure you want to delete this category? Items in this category will become uncategorized.')) return;
-
-  try {
-    const token = localStorage.getItem('authToken');
-    await axios.delete(`http://localhost:8080/api/marketplace/categories/${categoryId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    categories.value = categories.value.filter(c => c.id !== categoryId);
-    // Update items that might have been in this category
-    items.value = items.value.map(item => {
-      if (item.categoryId === categoryId) {
-        return { ...item, categoryId: undefined };
-      }
-      return item;
-    });
-  } catch (error) {
-    console.error('Error deleting category:', error);
-    alert('Failed to delete category. Please try again.');
-  }
-};
-
-// User lookup
-const lookupUser = async (): Promise<void> => {
-  if (!userEmail.value.trim()) {
-    userError.value = 'Email cannot be empty.';
-    return;
-  }
-
-  isUserLoading.value = true;
-  userError.value = '';
-
-  try {
-    const token = localStorage.getItem('authToken');
-    const response = await axios.get<User>(`http://localhost:8080/api/marketplace/users/${userEmail.value}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    userDetails.value = response.data;
-  } catch (error) {
-    console.error('Error looking up user:', error);
-    userDetails.value = null;
-
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        userError.value = 'User not found. Please check the email address.';
-      } else if (error.response?.status === 401) {
-        userError.value = 'Unauthorized. Please login again.';
-      } else {
-        userError.value = 'An error occurred while looking up the user.';
-      }
-    } else {
-      userError.value = 'An unexpected error occurred.';
+const { mutate: deleteCategoryMutation } = useDeleteCategory({
+  mutation: {
+    onSuccess: (_, variables) => {
+      categories.value = categories.value.filter(cat => cat.id !== variables.categoryId);
+    },
+    onError: (error) => {
+      console.error('Error deleting category:', error);
+      alert('Failed to delete category. Please try again.');
     }
-  } finally {
-    isUserLoading.value = false;
   }
+});
+
+const deleteCategory = async (categoryId: number): Promise<void> => {
+  if (!confirm('Are you sure you want to delete this category?')) return;
+  deleteCategoryMutation({ categoryId });
 };
+
+// Fetch user details
+const { data: userData, isLoading: userLoading } = useGetUserByEmail(userEmail, {
+  query: {
+    enabled: computed(() => !!userEmail.value),
+    onSuccess: (data: { data: User }) => {
+      userDetails.value = data.data;
+      userError.value = '';
+    },
+    onError: (error: AxiosError) => {
+      console.error('Error fetching user:', error);
+      userError.value = 'Failed to load user details. Please try again.';
+      userDetails.value = null;
+    }
+  }
+});
 
 // Make user admin
-const makeUserAdmin = async (): Promise<void> => {
-  if (!userDetails.value) {
-    alert('No user selected.');
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      alert('No authentication token found.');
-      return;
-    }
-
-    const email = userDetails.value.email.toLowerCase().trim(); // Normalize email
-    console.log('Making user admin for email:', email);
-
-    await axios.put(
-      `http://localhost:8080/api/marketplace/admin/${encodeURIComponent(email)}`,
-      null,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+const { mutate: makeUserAdminMutation } = useMakeUserAdmin({
+  mutation: {
+    onSuccess: () => {
+      if (userDetails.value) {
+        userDetails.value.role = 'ADMIN';
       }
-    );
-
-    alert('User role updated to ADMIN successfully.');
-    userDetails.value.role = 'ADMIN';
-  } catch (error) {
-    console.error('Error making user admin:', error);
-    if (axios.isAxiosError(error)) {
-      alert(`Failed to update user role: ${error.response?.data || error.message}`);
-    } else {
-      alert('Failed to update user role. Please try again.');
+    },
+    onError: (error: AxiosError) => {
+      console.error('Error making user admin:', error);
+      alert('Failed to make user admin. Please try again.');
     }
   }
+});
+
+const makeUserAdmin = async (): Promise<void> => {
+  if (!userEmail.value) return;
+  makeUserAdminMutation({ email: userEmail.value });
 };
 
-// Remove admin role from a user
-const removeAdminRole = async (): Promise<void> => {
-  if (!userDetails.value) {
-    alert('No user selected.');
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      alert('No authentication token found.');
-      return;
-    }
-
-    const email = userDetails.value.email.toLowerCase().trim(); // Normalize email
-    console.log('Removing admin role for email:', email);
-
-    await axios.put(
-      `http://localhost:8080/api/marketplace/admin/remove/${encodeURIComponent(email)}`,
-      null,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+// Remove admin role
+const { mutate: removeAdminRoleMutation } = useRemoveAdminRole({
+  mutation: {
+    onSuccess: () => {
+      if (userDetails.value) {
+        userDetails.value.role = 'USER';
       }
-    );
-
-    alert('Admin role removed successfully.');
-    userDetails.value.role = 'USER'; // Update role locally
-  } catch (error) {
-    console.error('Error removing admin role:', error);
-    if (axios.isAxiosError(error)) {
-      alert(`Failed to remove admin role: ${error.response?.data || error.message}`);
-    } else {
+    },
+    onError: (error: AxiosError) => {
+      console.error('Error removing admin role:', error);
       alert('Failed to remove admin role. Please try again.');
     }
   }
+});
+
+const removeAdminRole = async (): Promise<void> => {
+  if (!userEmail.value) return;
+  removeAdminRoleMutation({ email: userEmail.value });
 };
 
-// Delete a user
-const deleteUser = async (): Promise<void> => {
-  if (!userDetails.value) {
-    alert('No user selected.');
-    return;
-  }
-
-  if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
-
-  try {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      alert('No authentication token found.');
-      return;
-    }
-
-    const email = userDetails.value.email.toLowerCase().trim(); // Normalize email
-    console.log('Deleting user with email:', email);
-
-    await axios.delete(
-      `http://localhost:8080/api/marketplace/users/${encodeURIComponent(email)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    alert('User deleted successfully.');
-    userDetails.value = null; // Clear user details
-  } catch (error) {
-    console.error('Error deleting user:', error);
-    if (axios.isAxiosError(error)) {
-      alert(`Failed to delete user: ${error.response?.data || error.message}`);
-    } else {
+// Delete user
+const { mutate: deleteUserMutation } = useDeleteUserByEmail({
+  mutation: {
+    onSuccess: () => {
+      userDetails.value = null;
+      userEmail.value = '';
+    },
+    onError: (error: AxiosError) => {
+      console.error('Error deleting user:', error);
       alert('Failed to delete user. Please try again.');
     }
   }
+});
+
+const deleteUser = async (): Promise<void> => {
+  if (!userEmail.value) return;
+  if (!confirm('Are you sure you want to delete this user?')) return;
+  deleteUserMutation({ email: userEmail.value });
 };
 
 // Initialize data

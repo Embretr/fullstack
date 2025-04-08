@@ -25,39 +25,47 @@
 
   <script setup lang="ts">
   import { ref } from 'vue'
-  import axios from 'axios'
   import { useI18n } from 'vue-i18n'
+  import { useRegister } from '../api/authentication/authentication'
+  import { useRouter } from 'vue-router'
+  import type { User } from '../api/model'
 
   const { t } = useI18n()
+  const router = useRouter()
   const name = ref('')
   const email = ref('')
   const password = ref('')
   const confirmPassword = ref('')
   const message = ref('')
 
+  const { mutate: registerUser } = useRegister({
+    mutation: {
+      onSuccess: (data) => {
+        message.value = data.data || t('registerForm.successMessage')
+        console.log('Register attempt successful:', data.data)
+        alert(message.value)
+        router.push('/login')
+      },
+      onError: (error) => {
+        const errorMsg = error.response?.data || t('registerForm.errorDefault')
+        alert(errorMsg)
+      }
+    }
+  })
+
   const handleRegister = async () => {
     if (password.value !== confirmPassword.value) {
       alert(t('registerForm.errorPasswordMismatch'))
       return
     }
-    try {
-      const response = await axios.post('http://localhost:8080/api/register', {
-        username: name.value,
-        email: email.value,
-        password: password.value,
-      })
-      message.value = response.data || t('registerForm.successMessage')
-      console.log('Register attempt successful:', response.data)
-      alert(message.value)
-
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMsg = error.response?.data || t('registerForm.errorDefault')
-        alert(errorMsg)
-      } else {
-        alert(t('loginForm.errorUnexpected'))
-      }
+    
+    const user: User = {
+      username: name.value,
+      email: email.value,
+      password: password.value,
     }
+    
+    registerUser({ data: user })
   }
   </script>
 

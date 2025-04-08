@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, Ref } from 'vue';
 import { onMounted } from 'vue';
-import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useGetAllItems } from '../api/item-management/item-management';
+import type { Item } from '../api/model';
+import type { AxiosError } from 'axios';
 
 // Define an interface for the item structure
 interface Item {
@@ -17,20 +19,21 @@ const router = useRouter();
 const items: Ref<Item[]> = ref([]);
 
 // Fetch all available items from the database
-const fetchItems = async (): Promise<void> => {
-  try {
-    const response = await axios.get<Item[]>('http://localhost:8080/api/items');
-    items.value = response.data;
-
-    // Log the fetched items and their image URLs
-    items.value.forEach((item) => {
-      console.log(`Fetched item: ${item.title}, Image URL: ${item.imageUrl || 'default-image-url.jpg'}`);
-    });
-  } catch (error) {
-    console.error('Error fetching items:', error);
-    alert('Failed to load items. Please try again later.');
+const { data: itemsData, isLoading } = useGetAllItems({
+  query: {
+    onSuccess: (data: { data: Item[] }) => {
+      items.value = data.data;
+      // Log the fetched items and their image URLs
+      for (const item of items.value) {
+        console.log(`Fetched item: ${item.title}, Image URL: ${item.imageUrl || 'default-image-url.jpg'}`);
+      }
+    },
+    onError: (error: AxiosError) => {
+      console.error('Error fetching items:', error);
+      alert('Failed to load items. Please try again later.');
+    }
   }
-};
+});
 
 // Redirect logic
 const handleRedirect = (): void => {

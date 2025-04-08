@@ -45,15 +45,51 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import axios from 'axios';
 import { useI18n } from 'vue-i18n';
+import { useUpdateUserName } from '../api/user-profile/user-profile';
+import { useUpdateUserEmail } from '../api/user-profile/user-profile';
+import { useUpdateUserPassword } from '../api/user-profile/user-profile';
+import type { UpdateUsernameRequest, UpdateEmailRequest, UpdatePasswordRequest } from '../api/model';
+import type { AxiosError } from 'axios';
 
 const { t } = useI18n();
 const name = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
-const API_URL = 'http://localhost:8080/api';
+
+const { mutate: updateName } = useUpdateUserName({
+  mutation: {
+    onSuccess: () => {
+      console.log('Name updated successfully');
+    },
+    onError: (error: AxiosError) => {
+      alert(error.response?.data || t('userSettings.errorUpdateName'));
+    }
+  }
+});
+
+const { mutate: updateEmail } = useUpdateUserEmail({
+  mutation: {
+    onSuccess: () => {
+      console.log('Email updated successfully');
+    },
+    onError: (error: AxiosError) => {
+      alert(error.response?.data || t('userSettings.errorUpdateEmail'));
+    }
+  }
+});
+
+const { mutate: updatePassword } = useUpdateUserPassword({
+  mutation: {
+    onSuccess: () => {
+      console.log('Password updated successfully');
+    },
+    onError: (error: AxiosError) => {
+      alert(error.response?.data || t('userSettings.errorUpdatePassword'));
+    }
+  }
+});
 
 const updateSettings = async () => {
   const token = localStorage.getItem('authToken');
@@ -66,22 +102,18 @@ const updateSettings = async () => {
   try {
     // Update name
     if (name.value) {
-      await axios.put(
-        `${API_URL}/userinfo/name`,
-        { username: name.value },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      console.log('Name updated successfully');
+      const nameRequest: UpdateUsernameRequest = {
+        username: name.value
+      };
+      updateName({ data: nameRequest });
     }
 
     // Update email
     if (email.value) {
-      await axios.put(
-        `${API_URL}/userinfo/email`,
-        { email: email.value },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      console.log('Email updated successfully');
+      const emailRequest: UpdateEmailRequest = {
+        email: email.value
+      };
+      updateEmail({ data: emailRequest });
     }
 
     // Update password
@@ -90,12 +122,10 @@ const updateSettings = async () => {
         alert(t('registerForm.errorPasswordMismatch'));
         return;
       }
-      await axios.put(
-        `${API_URL}/userinfo/password`,
-        { password: password.value },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      console.log('Password updated successfully');
+      const passwordRequest: UpdatePasswordRequest = {
+        password: password.value
+      };
+      updatePassword({ data: passwordRequest });
     }
 
     alert(t('userSettings.successMessage'));
