@@ -1,39 +1,13 @@
 <script setup lang="ts">
-import { ref, Ref } from 'vue';
-import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useGetAllItems } from '../api/item-management/item-management';
-import type { Item } from '../api/model';
-import type { AxiosError } from 'axios';
 
-// Define an interface for the item structure
-interface Item {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-  imageUrl?: string;
-}
+
 
 const router = useRouter();
-const items: Ref<Item[]> = ref([]);
 
 // Fetch all available items from the database
-const { data: itemsData, isLoading } = useGetAllItems({
-  query: {
-    onSuccess: (data: { data: Item[] }) => {
-      items.value = data.data;
-      // Log the fetched items and their image URLs
-      for (const item of items.value) {
-        console.log(`Fetched item: ${item.title}, Image URL: ${item.imageUrl || 'default-image-url.jpg'}`);
-      }
-    },
-    onError: (error: AxiosError) => {
-      console.error('Error fetching items:', error);
-      alert('Failed to load items. Please try again later.');
-    }
-  }
-});
+const { data: itemsData } = useGetAllItems();
 
 // Redirect logic
 const handleRedirect = (): void => {
@@ -45,10 +19,6 @@ const handleRedirect = (): void => {
   }
 };
 
-// Fetch items when the component is mounted
-onMounted(() => {
-  fetchItems();
-});
 </script>
 
 <template>
@@ -58,10 +28,10 @@ onMounted(() => {
 
     <!-- Items List -->
     <div class="items-list">
-      <div v-for="item in items" :key="item.id" class="item-card">
-        <img :src="item.imageUrl || 'default-image-url.jpg'" alt="Item Image" class="item-image" />
+      <div v-for="item in itemsData?.data" :key="item.id" class="item-card">
+        <img :src="item.images?.[0]?.imageUrl || 'default-image-url.jpg'" alt="Item Image" class="item-image" />
         <h3>{{ item.title }}</h3>
-        <p>{{ item.description || 'No description available' }}</p>
+        <p>{{ item.briefDescription || 'No description available' }}</p>
         <p>${{ item.price }}</p>
       </div>
     </div>
