@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @Service
 public class FavoriteService {
+    /** Repository for managing favorite relationships between users and items. */
     private final FavoriteRepository favoriteRepository;
 
     @Autowired

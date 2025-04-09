@@ -2,7 +2,6 @@ package stanism.marketplace.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -62,6 +61,7 @@ public class ItemController {
     /** Utility for JWT token operations. */
     private final JwtUtil jwtUtil;
 
+    /** Service for handling favorite-related operations. */
     private final FavoriteService favoriteService;
 
     public ItemController(ItemService itemService, UserService userService,
@@ -95,7 +95,8 @@ public class ItemController {
     }
 
     @GetMapping("/user")
-    @Operation(summary = "Get user's items", description = "Retrieves all items belonging to the currently logged-in user", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Get user's items",
+            description = "Retrieves all items belonging to the currently logged-in user")
     public ResponseEntity<?> getUserItems(
             @RequestHeader(value = "Authorization", required = false) String token) {
         if (token == null || token.trim().isEmpty()) {
@@ -135,7 +136,7 @@ public class ItemController {
     }
 
     @PostMapping
-    @Operation(summary = "Create new item", description = "Creates a new item with associated images", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Create new item", description = "Creates a new item with associated images")
     public ResponseEntity<?> createItem(
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestParam("images") MultipartFile[] imageFiles,
@@ -216,7 +217,7 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}")
-    @Operation(summary = "Delete item", description = "Deletes an item by its ID", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Delete item", description = "Deletes an item by its ID")
     public ResponseEntity<?> deleteItem(@PathVariable Long itemId) {
         Optional<Item> optionalItem = itemService.getItemById(itemId);
         if (optionalItem.isEmpty()) {
@@ -246,7 +247,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/favorite")
-    @Operation(summary = "Add item to favorites", description = "Adds an item to the user's favorites", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Add item to favorites", description = "Adds an item to the user's favorites")
     public ResponseEntity<?> addToFavorites(
             @RequestHeader(value = "Authorization", required = false) String token,
             @PathVariable Long itemId) {
@@ -266,7 +267,7 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}/favorite")
-    @Operation(summary = "Remove item from favorites", description = "Removes an item from the user's favorites", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Remove item from favorites", description = "Removes an item from the user's favorites")
     public ResponseEntity<?> removeFromFavorites(
             @PathVariable Long itemId) {
 
@@ -285,7 +286,7 @@ public class ItemController {
     }
 
     @GetMapping("/favorites")
-    @Operation(summary = "Get user's favorites", description = "Retrieves all items favorited by the current user", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Get user's favorites", description = "Retrieves all items favorited by the current user")
     public ResponseEntity<?> getUserFavorites() {
 
         Optional<User> currentUser = userService.getCurrentUser();
@@ -301,7 +302,8 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}/is-favorite")
-    @Operation(summary = "Check if item is favorited", description = "Checks if the current user has favorited the item", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Check if item is favorited",
+            description = "Checks if the current user has favorited the item")
     public ResponseEntity<?> isItemFavorited(
             @PathVariable Long itemId) {
 
