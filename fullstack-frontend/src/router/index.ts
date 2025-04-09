@@ -13,6 +13,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Categories.vue')
   },
   {
+    path: '/categories/:id',
+    name: 'CategoryItems',
+    component: () => import('../views/CategoryItems.vue')
+  },
+  {
     path: '/favorites',
     name: 'Favorites',
     component: () => import('../views/Favorites.vue'),
@@ -53,8 +58,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/admin',
     name: 'AdminPanel',
     component: () => import('@/components/AdminPanel.vue'),
+  },
+  {
+    path: '/item/:id',
+    name: 'ItemView',
+    component: () => import('../views/ItemView.vue')
   }
-
 ]
 
 const router = createRouter({

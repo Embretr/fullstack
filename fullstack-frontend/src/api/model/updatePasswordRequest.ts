@@ -9,10 +9,12 @@
  * Request payload for updating password
  */
 export interface UpdatePasswordRequest {
+  /** The current password for verification */
+  currentPassword: string;
   /**
    * The new desired password
-   * @minLength 6
+   * @minLength 8
    * @maxLength 2147483647
    */
-  password: string;
+  newPassword: string;
 }

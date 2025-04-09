@@ -1,32 +1,23 @@
 <template>
   <div class="categories">
     <h1>{{ $t('categoriesView.title') }}</h1>
-    <div class="categories-grid">
-      <div v-for="category in categories" :key="category.id" class="category-card">
+    <div v-if="isLoading" class="loading">Loading...</div>
+    <div v-else-if="error" class="error">Error loading categories</div>
+    <div v-else class="categories-grid">
+      <router-link v-for="category in categoriesData?.data" :key="category.id" :to="'/categories/' + category.id" class="category-card">
         <h2>{{ category.name }}</h2>
-        <p>{{ category.description }}</p>
-      </div>
+      </router-link>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
+import { useGetAllCategories } from '@/api/category-management/category-management';
 
-const { t } = useI18n();
 
-interface Category {
-  id: number;
-  name: string;
-  description: string;
-}
+const { data:categoriesData, isLoading, error } = useGetAllCategories();
 
-const categories: Category[] = [
-  { id: 1, name: t('categoriesView.categoryElectronicsName'), description: t('categoriesView.categoryElectronicsDesc') },
-  { id: 2, name: t('categoriesView.categoryClothingName'), description: t('categoriesView.categoryClothingDesc') },
-  { id: 3, name: t('categoriesView.categoryHomeGardenName'), description: t('categoriesView.categoryHomeGardenDesc') },
-  { id: 4, name: t('categoriesView.categorySportsName'), description: t('categoriesView.categorySportsDesc') }
-];
+
 </script>
 
 <style scoped>
@@ -47,6 +38,8 @@ const categories: Category[] = [
   border-radius: var(--border-radius);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
+  text-decoration: none;
+  color: inherit;
 }
 
 .category-card:hover {
@@ -61,5 +54,11 @@ h1 {
 h2 {
   color: var(--secondary-color);
   margin-bottom: 0.5rem;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 2rem;
+  color: var(--secondary-color);
 }
 </style> 

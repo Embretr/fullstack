@@ -14,5 +14,5 @@ export interface UpdateUsernameRequest {
    * @minLength 3
    * @maxLength 50
    */
-  username: string;
+  newUsername: string;
 }
