@@ -130,11 +130,7 @@ const updateSettings = async () => {
 
     alert(t('userSettings.successMessage'));
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Failed to update settings:', error.response?.data || error.message);
-    } else {
-      console.error('Failed to update settings:', error);
-    }
+    console.error('Failed to update settings:', error);
     alert(t('userSettings.errorDefault'));
   }
 };
