@@ -25,6 +25,8 @@ import stanism.marketplace.model.Image;
 import stanism.marketplace.model.Item;
 import stanism.marketplace.model.User;
 import stanism.marketplace.model.dto.CreateItemRequestDTO;
+import stanism.marketplace.model.dto.ItemResponseDTO;
+import stanism.marketplace.model.dto.ItemMapper;
 import stanism.marketplace.security.JwtUtil;
 import stanism.marketplace.service.CategoryService;
 import stanism.marketplace.service.ItemService;
@@ -38,6 +40,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/items")
@@ -67,9 +70,22 @@ public class ItemController {
 
     @GetMapping
     @Operation(summary = "Get all items", description = "Retrieves a list of all items in the marketplace")
-    public ResponseEntity<List<Item>> getAllItems() {
+    public ResponseEntity<List<ItemResponseDTO>> getAllItems() {
         List<Item> items = itemService.getAllItems();
-        return ResponseEntity.ok(items);
+        List<ItemResponseDTO> itemDTOs = items.stream()
+                .map(ItemMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(itemDTOs);
+    }
+
+    @GetMapping("/{itemId}")
+    @Operation(summary = "Get item by ID", description = "Retrieves a single item by its ID")
+    public ResponseEntity<?> getItemById(@PathVariable Long itemId) {
+        Optional<Item> optionalItem = itemService.getItemById(itemId);
+        if (optionalItem.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found");
+        }
+        return ResponseEntity.ok(ItemMapper.toDTO(optionalItem.get()));
     }
 
     @GetMapping("/user")
@@ -90,7 +106,10 @@ public class ItemController {
         Optional<User> currentUser = userService.getCurrentUser();
         if (currentUser.isPresent() && currentUser.get().getEmail().equals(email)) {
             List<Item> userItems = itemService.getItemsByUser(currentUser.get());
-            return ResponseEntity.ok(userItems);
+            List<ItemResponseDTO> itemDTOs = userItems.stream()
+                    .map(ItemMapper::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(itemDTOs);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
     }
@@ -98,7 +117,7 @@ public class ItemController {
     @GetMapping("/category/{categoryId}")
     @Operation(summary = "Get items by category", 
               description = "Retrieves all items belonging to a specific category")
-    public ResponseEntity<List<Item>> getItemsByCategory(@PathVariable Long categoryId) {
+    public ResponseEntity<List<ItemResponseDTO>> getItemsByCategory(@PathVariable Long categoryId) {
         Optional<Category> optionalCategory = Optional.ofNullable(categoryService.getCategoryById(categoryId));
         if (optionalCategory.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
@@ -106,7 +125,10 @@ public class ItemController {
 
         Category category = optionalCategory.get();
         List<Item> items = itemService.getItemsByCategory(category);
-        return ResponseEntity.ok(items);
+        List<ItemResponseDTO> itemDTOs = items.stream()
+                .map(ItemMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(itemDTOs);
     }
 
     @PostMapping

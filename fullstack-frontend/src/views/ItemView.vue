@@ -2,37 +2,41 @@
 import { useRoute } from 'vue-router';
 import { useGetItemById } from '../api/item-management/item-management';
 import { computed } from 'vue';
+import type { ItemResponseDTO } from '../api/model/itemResponseDTO';
 
 const route = useRoute();
 const itemId = computed(() => route.params.id as string);
-const { data: itemData } = useGetItemById(itemId.value);
+const { data: itemData } = useGetItemById(Number(itemId.value));
+
+// Type assertion for the item data
+const typedItemData = computed(() => itemData.value?.data as ItemResponseDTO | undefined);
 </script>
 
 <template>
-  <div class="item-view" v-if="itemData?.data">
+  <div class="item-view" v-if="typedItemData">
     <div class="item-container">
       <!-- Image Gallery -->
       <div class="image-gallery">
         <img 
-          v-for="image in itemData.data.images" 
-          :key="image.id" 
-          :src="image.imageUrl" 
-          :alt="itemData.data.title"
+          v-for="image in typedItemData.imageUrls" 
+          :key="image" 
+          :src="image" 
+          :alt="typedItemData.title"
           class="gallery-image"
         />
       </div>
 
       <!-- Item Details -->
       <div class="item-details">
-        <h1>{{ itemData.data.title }}</h1>
-        <p class="price">${{ itemData.data.price }}</p>
+        <h1>{{ typedItemData.title }}</h1>
+        <p class="price">${{ typedItemData.price }}</p>
         <div class="description">
           <h3>Description</h3>
-          <p>{{ itemData.data.fullDescription }}</p>
+          <p>{{ typedItemData.fullDescription }}</p>
         </div>
         <div class="seller-info">
           <h3>Seller Information</h3>
-          <p>Posted by: {{ itemData.data.user?.username || 'Anonymous' }}</p>
+          <p>Posted by: {{ typedItemData.owner?.username || 'Anonymous' }}</p>
         </div>
       </div>
     </div>

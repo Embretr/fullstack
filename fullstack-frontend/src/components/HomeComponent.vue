@@ -29,7 +29,7 @@ const handleRedirect = (): void => {
     <!-- Items List -->
     <div class="items-list">
       <div v-for="item in itemsData?.data" :key="item.id" class="item-card" @click="router.push(`/item/${item.id}`)">
-        <img :src="item.images?.[0]?.imageUrl || 'default-image-url.jpg'" alt="Item Image" class="item-image" />
+        <img :src="item.imageUrls?.[0] || 'default-image-url.jpg'" alt="Item Image" class="item-image" />
         <h3>{{ item.title }}</h3>
         <p>{{ item.briefDescription || 'No description available' }}</p>
         <p>${{ item.price }}</p>

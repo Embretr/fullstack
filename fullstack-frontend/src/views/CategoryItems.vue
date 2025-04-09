@@ -4,7 +4,7 @@
     <div v-if="error" class="error">{{ error }}</div>
     <div v-else class="items-grid">
       <div v-for="item in itemsData?.data" :key="item.id" class="item-card">
-        <router-link :to="'/items/' + item.id">
+        <router-link :to="'/item/' + item.id">
           <div class="item-image" v-if="item.imageUrls && item.imageUrls.length > 0">
             <img :src="item.imageUrls[0]" :alt="item.title">
           </div>
@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGetItemsByCategory } from '@/api/item-management/item-management';
 import { useGetCategoryById } from '@/api/category-management/category-management';
@@ -29,10 +29,10 @@ const route = useRoute();
 const categoryId = computed(() => Number(route.params.id));
 
 // Get items by category
-const { data: itemsData, isLoading, error } = useGetItemsByCategory(categoryId);
+const { data: itemsData, error } = useGetItemsByCategory(categoryId);
 
 // Get category details
-const { data: categoryData, isLoading: categoryLoading, error: categoryError } = useGetCategoryById(categoryId);
+const { data: categoryData } = useGetCategoryById(categoryId);
 </script>
 
 <style scoped>
