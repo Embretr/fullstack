@@ -36,12 +36,16 @@ import type {
 } from 'vue';
 
 import type {
+  AddToFavorites200,
   CreateItem200,
   CreateItemParams,
   DeleteItem200,
   GetItemById200,
+  GetUserFavorites200,
   GetUserItems200,
-  ItemResponseDTO
+  IsItemFavorited200,
+  ItemResponseDTO,
+  RemoveFromFavorites200
 } from '.././model';
 
 
@@ -174,6 +178,128 @@ export const useCreateItem = <TError = AxiosError<unknown>,
       return useMutation(mutationOptions , queryClient);
     }
     /**
+ * Adds an item to the user's favorites
+ * @summary Add item to favorites
+ */
+export const addToFavorites = (
+    itemId: MaybeRef<number>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AddToFavorites200>> => {
+    itemId = unref(itemId);
+    
+    return axios.default.post(
+      `/api/items/${itemId}/favorite`,undefined,options
+    );
+  }
+
+
+
+export const getAddToFavoritesMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addToFavorites>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof addToFavorites>>, TError,{itemId: number}, TContext> => {
+    
+const mutationKey = ['addToFavorites'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addToFavorites>>, {itemId: number}> = (props) => {
+          const {itemId} = props ?? {};
+
+          return  addToFavorites(itemId,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddToFavoritesMutationResult = NonNullable<Awaited<ReturnType<typeof addToFavorites>>>
+    
+    export type AddToFavoritesMutationError = AxiosError<unknown>
+
+    /**
+ * @summary Add item to favorites
+ */
+export const useAddToFavorites = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addToFavorites>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof addToFavorites>>,
+        TError,
+        {itemId: number},
+        TContext
+      > => {
+
+      const mutationOptions = getAddToFavoritesMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    /**
+ * Removes an item from the user's favorites
+ * @summary Remove item from favorites
+ */
+export const removeFromFavorites = (
+    itemId: MaybeRef<number>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<RemoveFromFavorites200>> => {
+    itemId = unref(itemId);
+    
+    return axios.default.delete(
+      `/api/items/${itemId}/favorite`,options
+    );
+  }
+
+
+
+export const getRemoveFromFavoritesMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeFromFavorites>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof removeFromFavorites>>, TError,{itemId: number}, TContext> => {
+    
+const mutationKey = ['removeFromFavorites'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeFromFavorites>>, {itemId: number}> = (props) => {
+          const {itemId} = props ?? {};
+
+          return  removeFromFavorites(itemId,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveFromFavoritesMutationResult = NonNullable<Awaited<ReturnType<typeof removeFromFavorites>>>
+    
+    export type RemoveFromFavoritesMutationError = AxiosError<unknown>
+
+    /**
+ * @summary Remove item from favorites
+ */
+export const useRemoveFromFavorites = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeFromFavorites>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof removeFromFavorites>>,
+        TError,
+        {itemId: number},
+        TContext
+      > => {
+
+      const mutationOptions = getRemoveFromFavoritesMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    /**
  * Retrieves a single item by its ID
  * @summary Get item by ID
  */
@@ -297,6 +423,68 @@ export const useDeleteItem = <TError = AxiosError<unknown>,
       return useMutation(mutationOptions , queryClient);
     }
     /**
+ * Checks if the current user has favorited the item
+ * @summary Check if item is favorited
+ */
+export const isItemFavorited = (
+    itemId: MaybeRef<number>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<IsItemFavorited200>> => {
+    itemId = unref(itemId);
+    
+    return axios.default.get(
+      `/api/items/${itemId}/is-favorite`,options
+    );
+  }
+
+
+export const getIsItemFavoritedQueryKey = (itemId: MaybeRef<number>,) => {
+    return ['api','items',itemId,'is-favorite'] as const;
+    }
+
+    
+export const getIsItemFavoritedQueryOptions = <TData = Awaited<ReturnType<typeof isItemFavorited>>, TError = AxiosError<unknown>>(itemId: MaybeRef<number>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof isItemFavorited>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  getIsItemFavoritedQueryKey(itemId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof isItemFavorited>>> = ({ signal }) => isItemFavorited(itemId, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: computed(() => !!(unref(itemId))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof isItemFavorited>>, TError, TData> 
+}
+
+export type IsItemFavoritedQueryResult = NonNullable<Awaited<ReturnType<typeof isItemFavorited>>>
+export type IsItemFavoritedQueryError = AxiosError<unknown>
+
+
+/**
+ * @summary Check if item is favorited
+ */
+
+export function useIsItemFavorited<TData = Awaited<ReturnType<typeof isItemFavorited>>, TError = AxiosError<unknown>>(
+ itemId: MaybeRef<number>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof isItemFavorited>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getIsItemFavoritedQueryOptions(itemId,options)
+
+  const query = useQuery(queryOptions , queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+/**
  * Retrieves all items belonging to the currently logged-in user
  * @summary Get user's items
  */
@@ -412,6 +600,68 @@ export function useGetImage<TData = Awaited<ReturnType<typeof getImage>>, TError
  ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetImageQueryOptions(filename,options)
+
+  const query = useQuery(queryOptions , queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+/**
+ * Retrieves all items favorited by the current user
+ * @summary Get user's favorites
+ */
+export const getUserFavorites = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<GetUserFavorites200>> => {
+    
+    
+    return axios.default.get(
+      `/api/items/favorites`,options
+    );
+  }
+
+
+export const getGetUserFavoritesQueryKey = () => {
+    return ['api','items','favorites'] as const;
+    }
+
+    
+export const getGetUserFavoritesQueryOptions = <TData = Awaited<ReturnType<typeof getUserFavorites>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserFavorites>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  getGetUserFavoritesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserFavorites>>> = ({ signal }) => getUserFavorites({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserFavorites>>, TError, TData> 
+}
+
+export type GetUserFavoritesQueryResult = NonNullable<Awaited<ReturnType<typeof getUserFavorites>>>
+export type GetUserFavoritesQueryError = AxiosError<unknown>
+
+
+/**
+ * @summary Get user's favorites
+ */
+
+export function useGetUserFavorites<TData = Awaited<ReturnType<typeof getUserFavorites>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserFavorites>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetUserFavoritesQueryOptions(options)
 
   const query = useQuery(queryOptions , queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

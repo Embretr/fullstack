@@ -1,15 +1,55 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { useGetItemById } from '../api/item-management/item-management';
-import { computed } from 'vue';
+import { useGetItemById, useIsItemFavorited, useAddToFavorites, useRemoveFromFavorites } from '../api/item-management/item-management';
+import { computed, onMounted } from 'vue';
 import type { ItemResponseDTO } from '../api/model/itemResponseDTO';
+import { useAuthStore } from '@/stores/auth';
 
 const route = useRoute();
 const itemId = computed(() => route.params.id as string);
 const { data: itemData } = useGetItemById(Number(itemId.value));
+const authStore = useAuthStore();
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 // Type assertion for the item data
 const typedItemData = computed(() => itemData.value?.data as ItemResponseDTO | undefined);
+
+// Use the generated API client for favorite status
+const { data: favoriteData, refetch: refetchFavoriteStatus } = useIsItemFavorited(Number(itemId.value));
+const isFavorited = computed(() => favoriteData.value?.data ?? false);
+
+// Use the generated API client for adding/removing favorites
+const { mutate: addToFavorites } = useAddToFavorites({
+  mutation: {
+    onSuccess: () => {
+      refetchFavoriteStatus();
+    }
+  }
+});
+
+const { mutate: removeFromFavorites } = useRemoveFromFavorites({
+  mutation: {
+    onSuccess: () => {
+      refetchFavoriteStatus();
+    }
+  }
+});
+
+const toggleFavorite = () => {
+  if (!isAuthenticated.value) return;
+  
+  if (isFavorited.value) {
+    removeFromFavorites({ itemId: Number(itemId.value) });
+  } else {
+    addToFavorites({ itemId: Number(itemId.value) });
+  }
+};
+
+onMounted(() => {
+  if (isAuthenticated.value) {
+    refetchFavoriteStatus();
+  }
+});
 </script>
 
 <template>
@@ -38,6 +78,13 @@ const typedItemData = computed(() => itemData.value?.data as ItemResponseDTO | u
           <h3>Seller Information</h3>
           <p>Posted by: {{ typedItemData.owner?.username || 'Anonymous' }}</p>
         </div>
+        <button 
+          v-if="isAuthenticated" 
+          @click="toggleFavorite" 
+          :class="['favorite-button', { 'is-favorite': isFavorited }]"
+        >
+          {{ isFavorited ? 'Remove from Favorites' : 'Add to Favorites' }}
+        </button>
       </div>
     </div>
   </div>
@@ -97,6 +144,30 @@ h3 {
   padding: 2rem;
   font-size: 1.2rem;
   color: var(--text-secondary);
+}
+
+.favorite-button {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.favorite-button:hover {
+  background-color: var(--secondary-color-hover);
+}
+
+.favorite-button.is-favorite {
+  background-color: #ff4444;
+}
+
+.favorite-button.is-favorite:hover {
+  background-color: #cc0000;
 }
 
 @media (max-width: 768px) {
