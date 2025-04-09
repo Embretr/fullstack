@@ -105,6 +105,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (JWT_COOKIE_NAME.equals(cookie.getName())) {
           String token = cookie.getValue();
           
+          
           return token;
         }
       }

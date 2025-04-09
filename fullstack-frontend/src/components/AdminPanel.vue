@@ -1,94 +1,30 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useGetAllItems } from '../api/item-management/item-management';
 import { useDeleteItem } from '../api/item-management/item-management';
 import { useGetAllCategories } from '../api/category-management/category-management';
 import { useCreateCategory } from '../api/category-management/category-management';
-import { useDeleteCategory } from '../api/category-management/category-management';
 import { useGetUserByEmail } from '../api/user-management/user-management';
 import { useMakeUserAdmin } from '../api/user-management/user-management';
 import { useRemoveAdminRole } from '../api/user-management/user-management';
 import { useDeleteUserByEmail } from '../api/user-management/user-management';
-import type { Item, Category, User } from '../api/model';
+import type {  Category } from '../api/model';
 import type { AxiosError } from 'axios';
 
-interface Item {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-  categoryId?: number;
-  imageUrl?: string;
-}
-
-interface Category {
-  id: number;
-  name: string;
-}
-
-interface User {
-  id: number;
-  email: string;
-  username: string;
-  role: string;
-}
-
-// Items and Categories
-const items = ref<Item[]>([]);
-const categories = ref<Category[]>([]);
-const newCategoryName = ref('');
+// Search and filter state
 const searchQuery = ref('');
 const selectedCategory = ref<number | null>(null);
 const showItems = ref(true);
-const isLoading = ref(false);
-const errorMessage = ref('');
-
-// User management
 const userEmail = ref('');
-const userDetails = ref<User | null>(null);
-const userError = ref('');
-const isUserLoading = ref(false);
-
-// Computed property to filter items
-const filteredItems = computed(() => {
-  if (!showItems.value || !items.value) return [];
-
-  let result = [...items.value];
-
-  // Filter by search query
-  if (searchQuery.value) {
-    result = result.filter((item) =>
-      item.title?.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  }
-
-  // Filter by category
-  if (selectedCategory.value) {
-    result = result.filter((item) => item.categoryId === selectedCategory.value);
-  }
-
-  return result;
-});
 
 // Fetch all items
-const { data: itemsData, isLoading: itemsLoading } = useGetAllItems({
-  query: {
-    onSuccess: (data: { data: Item[] }) => {
-      items.value = data.data || [];
-    },
-    onError: (error: AxiosError) => {
-      console.error('Error fetching items:', error);
-      errorMessage.value = 'Failed to load items. Please try again later.';
-      items.value = [];
-    }
-  }
-});
+const { data: items, isLoading: itemsLoading, error: itemsError } = useGetAllItems();
 
 // Delete an item
 const { mutate: deleteItemMutation } = useDeleteItem({
   mutation: {
-    onSuccess: (_, variables) => {
-      items.value = items.value.filter(item => item.id !== variables.itemId);
+    onSuccess: (_, ) => {
+      // Vue Query will automatically refetch the items list
     },
     onError: (error: AxiosError) => {
       console.error('Error deleting item:', error);
@@ -103,20 +39,14 @@ const deleteItem = async (itemId: number): Promise<void> => {
 };
 
 // Fetch all categories
-const { data: categoriesData } = useGetAllCategories({
-  query: {
-    onSuccess: (data: { data: Category[] }) => {
-      categories.value = data.data || [];
-    }
-  }
-});
+const { data: categories } = useGetAllCategories();
 
 // Create a new category
 const { mutate: createCategoryMutation } = useCreateCategory({
   mutation: {
-    onSuccess: (data: { data: Category }) => {
-      categories.value.push(data.data);
+    onSuccess: () => {
       newCategoryName.value = '';
+      // Vue Query will automatically refetch the categories list
     },
     onError: (error: AxiosError) => {
       console.error('Error creating category:', error);
@@ -124,6 +54,8 @@ const { mutate: createCategoryMutation } = useCreateCategory({
     }
   }
 });
+
+const newCategoryName = ref('');
 
 const createCategory = async (): Promise<void> => {
   if (!newCategoryName.value.trim()) return;
@@ -135,37 +67,10 @@ const createCategory = async (): Promise<void> => {
   createCategoryMutation({ data: category });
 };
 
-// Delete a category
-const { mutate: deleteCategoryMutation } = useDeleteCategory({
-  mutation: {
-    onSuccess: (_, variables) => {
-      categories.value = categories.value.filter(cat => cat.id !== variables.categoryId);
-    },
-    onError: (error) => {
-      console.error('Error deleting category:', error);
-      alert('Failed to delete category. Please try again.');
-    }
-  }
-});
-
-const deleteCategory = async (categoryId: number): Promise<void> => {
-  if (!confirm('Are you sure you want to delete this category?')) return;
-  deleteCategoryMutation({ categoryId });
-};
-
 // Fetch user details
-const { data: userData, isLoading: userLoading } = useGetUserByEmail(userEmail, {
+const { data: userDetails, isLoading: userLoading, error: userError } = useGetUserByEmail(userEmail, {
   query: {
-    enabled: computed(() => !!userEmail.value),
-    onSuccess: (data: { data: User }) => {
-      userDetails.value = data.data;
-      userError.value = '';
-    },
-    onError: (error: AxiosError) => {
-      console.error('Error fetching user:', error);
-      userError.value = 'Failed to load user details. Please try again.';
-      userDetails.value = null;
-    }
+    enabled: computed(() => !!userEmail.value)
   }
 });
 
@@ -173,9 +78,7 @@ const { data: userData, isLoading: userLoading } = useGetUserByEmail(userEmail, 
 const { mutate: makeUserAdminMutation } = useMakeUserAdmin({
   mutation: {
     onSuccess: () => {
-      if (userDetails.value) {
-        userDetails.value.role = 'ADMIN';
-      }
+      // Vue Query will automatically refetch the user details
     },
     onError: (error: AxiosError) => {
       console.error('Error making user admin:', error);
@@ -193,9 +96,7 @@ const makeUserAdmin = async (): Promise<void> => {
 const { mutate: removeAdminRoleMutation } = useRemoveAdminRole({
   mutation: {
     onSuccess: () => {
-      if (userDetails.value) {
-        userDetails.value.role = 'USER';
-      }
+      // Vue Query will automatically refetch the user details
     },
     onError: (error: AxiosError) => {
       console.error('Error removing admin role:', error);
@@ -213,7 +114,6 @@ const removeAdminRole = async (): Promise<void> => {
 const { mutate: deleteUserMutation } = useDeleteUserByEmail({
   mutation: {
     onSuccess: () => {
-      userDetails.value = null;
       userEmail.value = '';
     },
     onError: (error: AxiosError) => {
@@ -229,10 +129,25 @@ const deleteUser = async (): Promise<void> => {
   deleteUserMutation({ email: userEmail.value });
 };
 
-// Initialize data
-onMounted(() => {
-  fetchItems();
-  fetchCategories();
+// Computed property to filter items
+const filteredItems = computed(() => {
+  if (!showItems.value || !items.value?.data) return [];
+
+  let result = [...items.value.data];
+
+  // Filter by search query
+  if (searchQuery.value) {
+    result = result.filter((item) =>
+      item.title?.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+  }
+
+  // Filter by category
+  if (selectedCategory.value) {
+    result = result.filter((item) => item.category?.id === selectedCategory.value);
+  }
+
+  return result;
 });
 </script>
 
@@ -241,10 +156,10 @@ onMounted(() => {
     <h2>Admin Panel</h2>
 
     <!-- Error Message -->
-    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+    <p v-if="itemsError" class="error-message">{{ itemsError.message }}</p>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="loading-state">
+    <div v-if="itemsLoading" class="loading-state">
       <p>Loading data...</p>
     </div>
 
@@ -269,14 +184,14 @@ onMounted(() => {
 
           <select v-model="selectedCategory" class="category-filter">
             <option :value="null">All Categories</option>
-            <option v-for="category in categories" :key="category.id" :value="category.id">
+            <option v-for="category in categories?.data" :key="category.id" :value="category.id">
               {{ category.name }}
             </option>
           </select>
         </div>
       </div>
 
-      <div v-if="!isLoading">
+      <div v-if="!itemsLoading">
         <table v-if="showItems && filteredItems.length > 0" class="items-table">
           <thead>
             <tr>
@@ -293,17 +208,17 @@ onMounted(() => {
             <tr v-for="item in filteredItems" :key="item.id">
               <td>{{ item.id }}</td>
               <td>{{ item.title }}</td>
-              <td>{{ item.description || 'No description' }}</td>
-              <td>${{ item.price.toFixed(2) }}</td>
+              <td>{{ item.briefDescription || 'No description' }}</td>
+              <td>${{ item.price?.toFixed(2) }}</td>
               <td>
-                {{ categories.find(c => c.id === item.categoryId)?.name || 'Uncategorized' }}
+                {{ item.category?.name || 'Uncategorized' }}
               </td>
               <td>
-                <img v-if="item.imageUrl" :src="item.imageUrl" alt="Item Image" class="item-image" />
+                <img v-if="item.imageUrls?.[0]" :src="item.imageUrls[0]" alt="Item Image" class="item-image" />
                 <span v-else>No image</span>
               </td>
               <td>
-                <button @click="deleteItem(item.id)" class="delete-btn">Delete</button>
+                <button @click="deleteItem(item.id!)" class="delete-btn">Delete</button>
               </td>
             </tr>
           </tbody>
@@ -329,21 +244,17 @@ onMounted(() => {
         <button @click="createCategory" class="create-category-btn">Create Category</button>
       </div>
 
-      <table v-if="categories.length > 0" class="categories-table">
+      <table v-if="categories?.data?.length" class="categories-table">
         <thead>
           <tr>
             <th>ID</th>
             <th>Name</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="category in categories" :key="category.id">
+          <tr v-for="category in categories.data" :key="category.id">
             <td>{{ category.id }}</td>
             <td>{{ category.name }}</td>
-            <td>
-              <button @click="deleteCategory(category.id)" class="delete-btn">Delete</button>
-            </td>
           </tr>
         </tbody>
       </table>
@@ -362,53 +273,52 @@ onMounted(() => {
           placeholder="Enter user email"
           class="user-email-input"
         />
-        <button @click="lookupUser" class="lookup-user-btn" :disabled="isUserLoading">
-          {{ isUserLoading ? 'Searching...' : 'Lookup User' }}
+        <button class="lookup-user-btn" :disabled="userLoading">
+          {{ userLoading ? 'Searching...' : 'Lookup User' }}
         </button>
       </div>
 
-      <p v-if="userError" class="user-error">{{ userError }}</p>
+      <p v-if="userError" class="user-error">{{ userError.message }}</p>
 
-      <div v-if="userDetails" class="user-details">
-  <h4>User Details</h4>
-  <div class="detail-row">
-    <span class="detail-label">Email:</span>
-    <span>{{ userDetails.email }}</span>
-  </div>
-  <div class="detail-row">
-    <span class="detail-label">Name:</span>
-    <span>{{ userDetails.username }}</span>
-  </div>
-  <div class="detail-row">
-    <span class="detail-label">Role:</span>
-    <span class="role-badge" :class="{ 'admin-role': userDetails.role === 'ADMIN' }">
-      {{ userDetails.role }}
-    </span>
-  </div>
+      <div v-if="userDetails?.data" class="user-details">
+        <h4>User Details</h4>
+        <div class="detail-row">
+          <span class="detail-label">Email:</span>
+          <span>{{ userDetails.data.email }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Name:</span>
+          <span>{{ userDetails.data.username }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Role:</span>
+          <span class="role-badge" :class="{ 'admin-role': userDetails.data.role === 'ADMIN' }">
+            {{ userDetails.data.role }}
+          </span>
+        </div>
 
+        <button
+          v-if="userDetails.data.role !== 'ADMIN'"
+          @click="makeUserAdmin"
+          class="make-admin-btn"
+        >
+          Make Admin
+        </button>
 
-  <button
-    v-if="userDetails.role !== 'ADMIN'"
-    @click="makeUserAdmin"
-    class="make-admin-btn"
-  >
-    Make Admin
-  </button>
+        <button
+          v-if="userDetails.data.role === 'ADMIN'"
+          @click="removeAdminRole"
+          class="remove-admin-btn"
+        >
+          Remove Admin Role
+        </button>
 
-  <button
-    v-if="userDetails.role === 'ADMIN'"
-    @click="removeAdminRole"
-    class="remove-admin-btn"
-  >
-    Remove Admin Role
-  </button>
-
-  <button
-    @click="deleteUser"
-    class="delete-user-btn"
-  >
-    Delete User
-  </button>
+        <button
+          @click="deleteUser"
+          class="delete-user-btn"
+        >
+          Delete User
+        </button>
       </div>
     </section>
   </div>

@@ -37,7 +37,8 @@ import type {
 import type {
   UpdateEmailRequest,
   UpdatePasswordRequest,
-  UpdateUsernameRequest
+  UpdateUsernameRequest,
+  User
 } from '.././model';
 
 
@@ -45,10 +46,72 @@ import type {
 
 
 /**
+ * Updates the username of the currently authenticated user.
+ * @summary Update username
+ */
+export const updateUsername = (
+    updateUsernameRequest: MaybeRef<UpdateUsernameRequest>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<string>> => {
+    updateUsernameRequest = unref(updateUsernameRequest);
+    
+    return axios.default.put(
+      `/api/userinfo/username`,
+      updateUsernameRequest,options
+    );
+  }
+
+
+
+export const getUpdateUsernameMutationOptions = <TError = AxiosError<string>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUsername>>, TError,{data: UpdateUsernameRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof updateUsername>>, TError,{data: UpdateUsernameRequest}, TContext> => {
+    
+const mutationKey = ['updateUsername'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateUsername>>, {data: UpdateUsernameRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateUsername(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateUsernameMutationResult = NonNullable<Awaited<ReturnType<typeof updateUsername>>>
+    export type UpdateUsernameMutationBody = UpdateUsernameRequest
+    export type UpdateUsernameMutationError = AxiosError<string>
+
+    /**
+ * @summary Update username
+ */
+export const useUpdateUsername = <TError = AxiosError<string>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUsername>>, TError,{data: UpdateUsernameRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof updateUsername>>,
+        TError,
+        {data: UpdateUsernameRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getUpdateUsernameMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    /**
  * Updates the password of the currently authenticated user.
  * @summary Update password
  */
-export const updateUserPassword = (
+export const updatePassword = (
     updatePasswordRequest: MaybeRef<UpdatePasswordRequest>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<string>> => {
     updatePasswordRequest = unref(updatePasswordRequest);
@@ -61,11 +124,11 @@ export const updateUserPassword = (
 
 
 
-export const getUpdateUserPasswordMutationOptions = <TError = AxiosError<string>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserPassword>>, TError,{data: UpdatePasswordRequest}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof updateUserPassword>>, TError,{data: UpdatePasswordRequest}, TContext> => {
+export const getUpdatePasswordMutationOptions = <TError = AxiosError<string>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePassword>>, TError,{data: UpdatePasswordRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePassword>>, TError,{data: UpdatePasswordRequest}, TContext> => {
     
-const mutationKey = ['updateUserPassword'];
+const mutationKey = ['updatePassword'];
 const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -75,10 +138,10 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateUserPassword>>, {data: UpdatePasswordRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePassword>>, {data: UpdatePasswordRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  updateUserPassword(data,axiosOptions)
+          return  updatePassword(data,axiosOptions)
         }
 
         
@@ -86,147 +149,23 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UpdateUserPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof updateUserPassword>>>
-    export type UpdateUserPasswordMutationBody = UpdatePasswordRequest
-    export type UpdateUserPasswordMutationError = AxiosError<string>
+    export type UpdatePasswordMutationResult = NonNullable<Awaited<ReturnType<typeof updatePassword>>>
+    export type UpdatePasswordMutationBody = UpdatePasswordRequest
+    export type UpdatePasswordMutationError = AxiosError<string>
 
     /**
  * @summary Update password
  */
-export const useUpdateUserPassword = <TError = AxiosError<string>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserPassword>>, TError,{data: UpdatePasswordRequest}, TContext>, axios?: AxiosRequestConfig}
+export const useUpdatePassword = <TError = AxiosError<string>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePassword>>, TError,{data: UpdatePasswordRequest}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationReturnType<
-        Awaited<ReturnType<typeof updateUserPassword>>,
+        Awaited<ReturnType<typeof updatePassword>>,
         TError,
         {data: UpdatePasswordRequest},
         TContext
       > => {
 
-      const mutationOptions = getUpdateUserPasswordMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    /**
- * Retrieves the username of the currently authenticated user.
- * @summary Get username
- */
-export const getUserName = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<string>> => {
-    
-    
-    return axios.default.get(
-      `/api/userinfo/name`,options
-    );
-  }
-
-
-export const getGetUserNameQueryKey = () => {
-    return ['api','userinfo','name'] as const;
-    }
-
-    
-export const getGetUserNameQueryOptions = <TData = Awaited<ReturnType<typeof getUserName>>, TError = AxiosError<string>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserName>>, TError, TData>>, axios?: AxiosRequestConfig}
-) => {
-
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
-
-  const queryKey =  getGetUserNameQueryKey();
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserName>>> = ({ signal }) => getUserName({ signal, ...axiosOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserName>>, TError, TData> 
-}
-
-export type GetUserNameQueryResult = NonNullable<Awaited<ReturnType<typeof getUserName>>>
-export type GetUserNameQueryError = AxiosError<string>
-
-
-/**
- * @summary Get username
- */
-
-export function useGetUserName<TData = Awaited<ReturnType<typeof getUserName>>, TError = AxiosError<string>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserName>>, TError, TData>>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient 
- ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetUserNameQueryOptions(options)
-
-  const query = useQuery(queryOptions , queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
-
-  return query;
-}
-
-
-
-/**
- * Updates the username of the currently authenticated user.
- * @summary Update username
- */
-export const updateUserName = (
-    updateUsernameRequest: MaybeRef<UpdateUsernameRequest>, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<string>> => {
-    updateUsernameRequest = unref(updateUsernameRequest);
-    
-    return axios.default.put(
-      `/api/userinfo/name`,
-      updateUsernameRequest,options
-    );
-  }
-
-
-
-export const getUpdateUserNameMutationOptions = <TError = AxiosError<string>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserName>>, TError,{data: UpdateUsernameRequest}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof updateUserName>>, TError,{data: UpdateUsernameRequest}, TContext> => {
-    
-const mutationKey = ['updateUserName'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateUserName>>, {data: UpdateUsernameRequest}> = (props) => {
-          const {data} = props ?? {};
-
-          return  updateUserName(data,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateUserNameMutationResult = NonNullable<Awaited<ReturnType<typeof updateUserName>>>
-    export type UpdateUserNameMutationBody = UpdateUsernameRequest
-    export type UpdateUserNameMutationError = AxiosError<string>
-
-    /**
- * @summary Update username
- */
-export const useUpdateUserName = <TError = AxiosError<string>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserName>>, TError,{data: UpdateUsernameRequest}, TContext>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient): UseMutationReturnType<
-        Awaited<ReturnType<typeof updateUserName>>,
-        TError,
-        {data: UpdateUsernameRequest},
-        TContext
-      > => {
-
-      const mutationOptions = getUpdateUserNameMutationOptions(options);
+      const mutationOptions = getUpdatePasswordMutationOptions(options);
 
       return useMutation(mutationOptions , queryClient);
     }
@@ -296,7 +235,7 @@ export function useGetUserEmail<TData = Awaited<ReturnType<typeof getUserEmail>>
  * Updates the email address of the currently authenticated user.
  * @summary Update email
  */
-export const updateUserEmail = (
+export const updateEmail = (
     updateEmailRequest: MaybeRef<UpdateEmailRequest>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<string>> => {
     updateEmailRequest = unref(updateEmailRequest);
@@ -309,11 +248,11 @@ export const updateUserEmail = (
 
 
 
-export const getUpdateUserEmailMutationOptions = <TError = AxiosError<string>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserEmail>>, TError,{data: UpdateEmailRequest}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof updateUserEmail>>, TError,{data: UpdateEmailRequest}, TContext> => {
+export const getUpdateEmailMutationOptions = <TError = AxiosError<string>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmail>>, TError,{data: UpdateEmailRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof updateEmail>>, TError,{data: UpdateEmailRequest}, TContext> => {
     
-const mutationKey = ['updateUserEmail'];
+const mutationKey = ['updateEmail'];
 const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -323,10 +262,10 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateUserEmail>>, {data: UpdateEmailRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateEmail>>, {data: UpdateEmailRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  updateUserEmail(data,axiosOptions)
+          return  updateEmail(data,axiosOptions)
         }
 
         
@@ -334,24 +273,147 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UpdateUserEmailMutationResult = NonNullable<Awaited<ReturnType<typeof updateUserEmail>>>
-    export type UpdateUserEmailMutationBody = UpdateEmailRequest
-    export type UpdateUserEmailMutationError = AxiosError<string>
+    export type UpdateEmailMutationResult = NonNullable<Awaited<ReturnType<typeof updateEmail>>>
+    export type UpdateEmailMutationBody = UpdateEmailRequest
+    export type UpdateEmailMutationError = AxiosError<string>
 
     /**
  * @summary Update email
  */
-export const useUpdateUserEmail = <TError = AxiosError<string>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserEmail>>, TError,{data: UpdateEmailRequest}, TContext>, axios?: AxiosRequestConfig}
+export const useUpdateEmail = <TError = AxiosError<string>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmail>>, TError,{data: UpdateEmailRequest}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationReturnType<
-        Awaited<ReturnType<typeof updateUserEmail>>,
+        Awaited<ReturnType<typeof updateEmail>>,
         TError,
         {data: UpdateEmailRequest},
         TContext
       > => {
 
-      const mutationOptions = getUpdateUserEmailMutationOptions(options);
+      const mutationOptions = getUpdateEmailMutationOptions(options);
 
       return useMutation(mutationOptions , queryClient);
     }
+    /**
+ * Retrieves the username of the currently authenticated user.
+ * @summary Get username
+ */
+export const getUserName = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<string>> => {
     
+    
+    return axios.default.get(
+      `/api/userinfo/name`,options
+    );
+  }
+
+
+export const getGetUserNameQueryKey = () => {
+    return ['api','userinfo','name'] as const;
+    }
+
+    
+export const getGetUserNameQueryOptions = <TData = Awaited<ReturnType<typeof getUserName>>, TError = AxiosError<string>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserName>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  getGetUserNameQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserName>>> = ({ signal }) => getUserName({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserName>>, TError, TData> 
+}
+
+export type GetUserNameQueryResult = NonNullable<Awaited<ReturnType<typeof getUserName>>>
+export type GetUserNameQueryError = AxiosError<string>
+
+
+/**
+ * @summary Get username
+ */
+
+export function useGetUserName<TData = Awaited<ReturnType<typeof getUserName>>, TError = AxiosError<string>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserName>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetUserNameQueryOptions(options)
+
+  const query = useQuery(queryOptions , queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+/**
+ * Retrieves the profile information of the currently authenticated user.
+ * @summary Get current user profile
+ */
+export const getCurrentUserProfile = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<User>> => {
+    
+    
+    return axios.default.get(
+      `/api/userinfo/me`,options
+    );
+  }
+
+
+export const getGetCurrentUserProfileQueryKey = () => {
+    return ['api','userinfo','me'] as const;
+    }
+
+    
+export const getGetCurrentUserProfileQueryOptions = <TData = Awaited<ReturnType<typeof getCurrentUserProfile>>, TError = AxiosError<string>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUserProfile>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  getGetCurrentUserProfileQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentUserProfile>>> = ({ signal }) => getCurrentUserProfile({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCurrentUserProfile>>, TError, TData> 
+}
+
+export type GetCurrentUserProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUserProfile>>>
+export type GetCurrentUserProfileQueryError = AxiosError<string>
+
+
+/**
+ * @summary Get current user profile
+ */
+
+export function useGetCurrentUserProfile<TData = Awaited<ReturnType<typeof getCurrentUserProfile>>, TError = AxiosError<string>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUserProfile>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCurrentUserProfileQueryOptions(options)
+
+  const query = useQuery(queryOptions , queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+

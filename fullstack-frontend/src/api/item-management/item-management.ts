@@ -39,8 +39,9 @@ import type {
   CreateItem200,
   CreateItemParams,
   DeleteItem200,
+  GetItemById200,
   GetUserItems200,
-  Item
+  ItemResponseDTO
 } from '.././model';
 
 
@@ -53,7 +54,7 @@ import type {
  */
 export const getAllItems = (
      options?: AxiosRequestConfig
- ): Promise<AxiosResponse<Item[]>> => {
+ ): Promise<AxiosResponse<ItemResponseDTO[]>> => {
     
     
     return axios.default.get(
@@ -169,6 +170,129 @@ export const useCreateItem = <TError = AxiosError<unknown>,
       > => {
 
       const mutationOptions = getCreateItemMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    /**
+ * Retrieves a single item by its ID
+ * @summary Get item by ID
+ */
+export const getItemById = (
+    itemId: MaybeRef<number>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<GetItemById200>> => {
+    itemId = unref(itemId);
+    
+    return axios.default.get(
+      `/api/items/${itemId}`,options
+    );
+  }
+
+
+export const getGetItemByIdQueryKey = (itemId: MaybeRef<number>,) => {
+    return ['api','items',itemId] as const;
+    }
+
+    
+export const getGetItemByIdQueryOptions = <TData = Awaited<ReturnType<typeof getItemById>>, TError = AxiosError<unknown>>(itemId: MaybeRef<number>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getItemById>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  getGetItemByIdQueryKey(itemId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getItemById>>> = ({ signal }) => getItemById(itemId, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: computed(() => !!(unref(itemId))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getItemById>>, TError, TData> 
+}
+
+export type GetItemByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getItemById>>>
+export type GetItemByIdQueryError = AxiosError<unknown>
+
+
+/**
+ * @summary Get item by ID
+ */
+
+export function useGetItemById<TData = Awaited<ReturnType<typeof getItemById>>, TError = AxiosError<unknown>>(
+ itemId: MaybeRef<number>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getItemById>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetItemByIdQueryOptions(itemId,options)
+
+  const query = useQuery(queryOptions , queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+/**
+ * Deletes an item by its ID
+ * @summary Delete item
+ */
+export const deleteItem = (
+    itemId: MaybeRef<number>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<DeleteItem200>> => {
+    itemId = unref(itemId);
+    
+    return axios.default.delete(
+      `/api/items/${itemId}`,options
+    );
+  }
+
+
+
+export const getDeleteItemMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteItem>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteItem>>, TError,{itemId: number}, TContext> => {
+    
+const mutationKey = ['deleteItem'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteItem>>, {itemId: number}> = (props) => {
+          const {itemId} = props ?? {};
+
+          return  deleteItem(itemId,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteItemMutationResult = NonNullable<Awaited<ReturnType<typeof deleteItem>>>
+    
+    export type DeleteItemMutationError = AxiosError<unknown>
+
+    /**
+ * @summary Delete item
+ */
+export const useDeleteItem = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteItem>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof deleteItem>>,
+        TError,
+        {itemId: number},
+        TContext
+      > => {
+
+      const mutationOptions = getDeleteItemMutationOptions(options);
 
       return useMutation(mutationOptions , queryClient);
     }
@@ -304,7 +428,7 @@ export function useGetImage<TData = Awaited<ReturnType<typeof getImage>>, TError
  */
 export const getItemsByCategory = (
     categoryId: MaybeRef<number>, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<Item[]>> => {
+ ): Promise<AxiosResponse<ItemResponseDTO[]>> => {
     categoryId = unref(categoryId);
     
     return axios.default.get(
@@ -360,65 +484,3 @@ export function useGetItemsByCategory<TData = Awaited<ReturnType<typeof getItems
 
 
 
-/**
- * Deletes an item by its ID
- * @summary Delete item
- */
-export const deleteItem = (
-    itemId: MaybeRef<number>, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<DeleteItem200>> => {
-    itemId = unref(itemId);
-    
-    return axios.default.delete(
-      `/api/items/${itemId}`,options
-    );
-  }
-
-
-
-export const getDeleteItemMutationOptions = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteItem>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteItem>>, TError,{itemId: number}, TContext> => {
-    
-const mutationKey = ['deleteItem'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteItem>>, {itemId: number}> = (props) => {
-          const {itemId} = props ?? {};
-
-          return  deleteItem(itemId,axiosOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteItemMutationResult = NonNullable<Awaited<ReturnType<typeof deleteItem>>>
-    
-    export type DeleteItemMutationError = AxiosError<unknown>
-
-    /**
- * @summary Delete item
- */
-export const useDeleteItem = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteItem>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient): UseMutationReturnType<
-        Awaited<ReturnType<typeof deleteItem>>,
-        TError,
-        {itemId: number},
-        TContext
-      > => {
-
-      const mutationOptions = getDeleteItemMutationOptions(options);
-
-      return useMutation(mutationOptions , queryClient);
-    }
-    
