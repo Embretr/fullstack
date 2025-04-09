@@ -214,7 +214,7 @@ const filteredItems = computed(() => {
                 {{ item.category?.name || 'Uncategorized' }}
               </td>
               <td>
-                <img v-if="item.images?.[0]?.imageUrl" :src="item.images[0].imageUrl" alt="Item Image" class="item-image" />
+                <img v-if="item.imageUrls?.[0]" :src="item.imageUrls[0]" alt="Item Image" class="item-image" />
                 <span v-else>No image</span>
               </td>
               <td>

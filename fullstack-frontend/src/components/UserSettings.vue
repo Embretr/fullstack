@@ -30,6 +30,15 @@
         />
       </div>
       <div class="form-group">
+        <label for="currentPassword">{{ $t('userSettings.currentPasswordLabel') }}</label>
+        <input
+          type="password"
+          id="currentPassword"
+          v-model="currentPassword"
+          :placeholder="$t('userSettings.currentPasswordPlaceholder')"
+        />
+      </div>
+      <div class="form-group">
         <label for="confirmPassword">{{ $t('userSettings.confirmNewPasswordLabel') }}</label>
         <input
           type="password"
@@ -46,9 +55,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUpdateUserName } from '../api/user-profile/user-profile';
-import { useUpdateUserEmail } from '../api/user-profile/user-profile';
-import { useUpdateUserPassword } from '../api/user-profile/user-profile';
+import { useUpdateUsername } from '../api/user-profile/user-profile';
+import { useUpdateEmail } from '../api/user-profile/user-profile';
+import { useUpdatePassword } from '../api/user-profile/user-profile';
 import type { UpdateUsernameRequest, UpdateEmailRequest, UpdatePasswordRequest } from '../api/model';
 import type { AxiosError } from 'axios';
 
@@ -56,9 +65,10 @@ const { t } = useI18n();
 const name = ref('');
 const email = ref('');
 const password = ref('');
+const currentPassword = ref('');
 const confirmPassword = ref('');
 
-const { mutate: updateName } = useUpdateUserName({
+const { mutate: updateUsername } = useUpdateUsername({
   mutation: {
     onSuccess: () => {
       console.log('Name updated successfully');
@@ -69,7 +79,7 @@ const { mutate: updateName } = useUpdateUserName({
   }
 });
 
-const { mutate: updateEmail } = useUpdateUserEmail({
+const { mutate: updateEmail } = useUpdateEmail({
   mutation: {
     onSuccess: () => {
       console.log('Email updated successfully');
@@ -80,7 +90,7 @@ const { mutate: updateEmail } = useUpdateUserEmail({
   }
 });
 
-const { mutate: updatePassword } = useUpdateUserPassword({
+const { mutate: updatePassword } = useUpdatePassword({
   mutation: {
     onSuccess: () => {
       console.log('Password updated successfully');
@@ -102,16 +112,16 @@ const updateSettings = async () => {
   try {
     // Update name
     if (name.value) {
-      const nameRequest: UpdateUsernameRequest = {
-        username: name.value
+      const usernameRequest: UpdateUsernameRequest = {
+        newUsername: name.value
       };
-      updateName({ data: nameRequest });
+      updateUsername({ data: usernameRequest });
     }
 
     // Update email
     if (email.value) {
       const emailRequest: UpdateEmailRequest = {
-        email: email.value
+        newEmail: email.value
       };
       updateEmail({ data: emailRequest });
     }
@@ -123,7 +133,8 @@ const updateSettings = async () => {
         return;
       }
       const passwordRequest: UpdatePasswordRequest = {
-        password: password.value
+        currentPassword: currentPassword.value,
+        newPassword: password.value
       };
       updatePassword({ data: passwordRequest });
     }

@@ -35,8 +35,7 @@ import type {
 } from 'vue';
 
 import type {
-  User,
-  UserResponse
+  User
 } from '.././model';
 
 
@@ -106,7 +105,7 @@ export const useRegister = <TError = AxiosError<string>,
       return useMutation(mutationOptions , queryClient);
     }
     /**
- * Logs out the currently authenticated user session and clears the JWT cookie.
+ * Logs out the current user and clears the JWT token cookie.
  * @summary User logout
  */
 export const logout = (
@@ -121,7 +120,7 @@ export const logout = (
 
 
 
-export const getLogoutMutationOptions = <TError = AxiosError<string>,
+export const getLogoutMutationOptions = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext> => {
     
@@ -148,12 +147,12 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type LogoutMutationResult = NonNullable<Awaited<ReturnType<typeof logout>>>
     
-    export type LogoutMutationError = AxiosError<string>
+    export type LogoutMutationError = AxiosError<unknown>
 
     /**
  * @summary User logout
  */
-export const useLogout = <TError = AxiosError<string>,
+export const useLogout = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationReturnType<
         Awaited<ReturnType<typeof logout>>,
@@ -234,7 +233,7 @@ export const useLogin = <TError = AxiosError<string>,
  */
 export const getMe = (
      options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserResponse>> => {
+ ): Promise<AxiosResponse<User>> => {
     
     
     return axios.default.get(
@@ -291,12 +290,12 @@ export function useGetMe<TData = Awaited<ReturnType<typeof getMe>>, TError = Axi
 
 
 /**
- * Verifies if the JWT cookie is valid, indicating an active session.
+ * Checks if the current user is logged in.
  * @summary Check login status
  */
 export const isLoggedIn = (
      options?: AxiosRequestConfig
- ): Promise<AxiosResponse<boolean>> => {
+ ): Promise<AxiosResponse<User>> => {
     
     
     return axios.default.get(
@@ -310,7 +309,7 @@ export const getIsLoggedInQueryKey = () => {
     }
 
     
-export const getIsLoggedInQueryOptions = <TData = Awaited<ReturnType<typeof isLoggedIn>>, TError = AxiosError<boolean>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof isLoggedIn>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getIsLoggedInQueryOptions = <TData = Awaited<ReturnType<typeof isLoggedIn>>, TError = AxiosError<string>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof isLoggedIn>>, TError, TData>>, axios?: AxiosRequestConfig}
 ) => {
 
 const {query: queryOptions, axios: axiosOptions} = options ?? {};
@@ -329,14 +328,14 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type IsLoggedInQueryResult = NonNullable<Awaited<ReturnType<typeof isLoggedIn>>>
-export type IsLoggedInQueryError = AxiosError<boolean>
+export type IsLoggedInQueryError = AxiosError<string>
 
 
 /**
  * @summary Check login status
  */
 
-export function useIsLoggedIn<TData = Awaited<ReturnType<typeof isLoggedIn>>, TError = AxiosError<boolean>>(
+export function useIsLoggedIn<TData = Awaited<ReturnType<typeof isLoggedIn>>, TError = AxiosError<string>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof isLoggedIn>>, TError, TData>>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient 
  ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

@@ -14,5 +14,5 @@ export interface UpdateEmailRequest {
    * @minLength 0
    * @maxLength 100
    */
-  email: string;
+  newEmail: string;
 }

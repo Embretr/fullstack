@@ -1,7 +1,6 @@
 package stanism.marketplace.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -15,11 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import stanism.marketplace.model.Category;
 import stanism.marketplace.model.Item;
+import stanism.marketplace.model.dto.CategoryResponseDTO;
 import stanism.marketplace.service.CategoryService;
 import stanism.marketplace.service.ItemService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -42,17 +43,43 @@ public class CategoryController {
     @Operation(summary = "Create category", 
               description = "Creates a new category",
               security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
+    public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody Category category) {
         Category createdCategory = categoryService.saveCategory(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+        CategoryResponseDTO responseDTO = new CategoryResponseDTO();
+        responseDTO.setId(createdCategory.getId());
+        responseDTO.setName(createdCategory.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
     @GetMapping
     @Operation(summary = "Get all categories", 
               description = "Retrieves a list of all categories")
-    public ResponseEntity<List<Category>> getAllCategories() {
+    public ResponseEntity<List<CategoryResponseDTO>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();
-        return ResponseEntity.ok(categories);
+        List<CategoryResponseDTO> categoryDTOs = categories.stream()
+            .map(category -> {
+                CategoryResponseDTO dto = new CategoryResponseDTO();
+                dto.setId(category.getId());
+                dto.setName(category.getName());
+                return dto;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(categoryDTOs);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get category by ID", 
+              description = "Retrieves a specific category by its ID")
+    public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable Long id) {
+        Category category = categoryService.getCategoryById(id);
+        if (category == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        
+        CategoryResponseDTO responseDTO = new CategoryResponseDTO();
+        responseDTO.setId(category.getId());
+        responseDTO.setName(category.getName());
+        return ResponseEntity.ok(responseDTO);
     }
 
     @PostMapping("/{itemId}/categories")

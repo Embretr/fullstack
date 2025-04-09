@@ -28,6 +28,7 @@ import type {
 } from 'axios';
 
 import {
+  computed,
   unref
 } from 'vue';
 import type {
@@ -36,7 +37,8 @@ import type {
 
 import type {
   AddCategoriesToItem200,
-  Category
+  Category,
+  CategoryResponseDTO
 } from '.././model';
 
 
@@ -49,7 +51,7 @@ import type {
  */
 export const getAllCategories = (
      options?: AxiosRequestConfig
- ): Promise<AxiosResponse<Category[]>> => {
+ ): Promise<AxiosResponse<CategoryResponseDTO[]>> => {
     
     
     return axios.default.get(
@@ -111,7 +113,7 @@ export function useGetAllCategories<TData = Awaited<ReturnType<typeof getAllCate
  */
 export const createCategory = (
     category: MaybeRef<Category>, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<Category>> => {
+ ): Promise<AxiosResponse<CategoryResponseDTO>> => {
     category = unref(category);
     
     return axios.default.post(
@@ -231,4 +233,65 @@ export const useAddCategoriesToItem = <TError = AxiosError<unknown>,
 
       return useMutation(mutationOptions , queryClient);
     }
+    /**
+ * Retrieves a specific category by its ID
+ * @summary Get category by ID
+ */
+export const getCategoryById = (
+    id: MaybeRef<number>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CategoryResponseDTO>> => {
+    id = unref(id);
     
+    return axios.default.get(
+      `/api/categories/${id}`,options
+    );
+  }
+
+
+export const getGetCategoryByIdQueryKey = (id: MaybeRef<number>,) => {
+    return ['api','categories',id] as const;
+    }
+
+    
+export const getGetCategoryByIdQueryOptions = <TData = Awaited<ReturnType<typeof getCategoryById>>, TError = AxiosError<unknown>>(id: MaybeRef<number>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCategoryById>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  getGetCategoryByIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCategoryById>>> = ({ signal }) => getCategoryById(id, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: computed(() => !!(unref(id))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCategoryById>>, TError, TData> 
+}
+
+export type GetCategoryByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getCategoryById>>>
+export type GetCategoryByIdQueryError = AxiosError<unknown>
+
+
+/**
+ * @summary Get category by ID
+ */
+
+export function useGetCategoryById<TData = Awaited<ReturnType<typeof getCategoryById>>, TError = AxiosError<unknown>>(
+ id: MaybeRef<number>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCategoryById>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCategoryByIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions , queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
