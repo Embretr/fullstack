@@ -1,60 +1,28 @@
 <template>
   <div class="favorites">
     <h1>{{ $t('favoritesView.title') }}</h1>
-    <div v-if="!favorites.length" class="empty-state">
+    <div v-if="favorites.length === 0" class="empty-state">
       <p>{{ $t('favoritesView.emptyState') }}</p>
     </div>
     <div v-else class="favorites-grid">
       <div v-for="item in favorites" :key="item.id" class="favorite-card">
-        <img v-if="item.imageUrls && item.imageUrls.length > 0" :src="item.imageUrls[0]" :alt="item.title" class="item-image">
-        <h2>{{ item.title }}</h2>
+        <h2>{{ item.name }}</h2>
         <p class="price">${{ item.price }}</p>
-        <p class="description">{{ item.briefDescription }}</p>
-        <button @click="removeFromFavorites(item.id)" class="remove-button">
-          {{ $t('favoritesView.remove') }}
-        </button>
+        <p class="description">{{ item.description }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
-import { useAuthStore } from '@/stores/auth';
-import { useGetUserFavorites, useRemoveFromFavorites } from '@/api/item-management/item-management';
-import type { ItemResponseDTO } from '@/api/model';
+interface FavoriteItem {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+}
 
-const authStore = useAuthStore();
-const favorites = ref<ItemResponseDTO[]>([]);
-
-const { data: favoritesData, refetch: refetchFavorites } = useGetUserFavorites();
-
-const { mutate: removeFavorite } = useRemoveFromFavorites({
-  mutation: {
-    onSuccess: () => {
-      refetchFavorites();
-    }
-  }
-});
-
-const removeFromFavorites = (itemId: number | undefined) => {
-  if (itemId) {
-    removeFavorite({ itemId });
-  }
-};
-
-onMounted(() => {
-  if (authStore.isAuthenticated) {
-    refetchFavorites();
-  }
-});
-
-// Watch for changes in favoritesData
-watch(favoritesData, (newData) => {
-  if (newData?.data) {
-    favorites.value = Array.isArray(newData.data) ? newData.data : [];
-  }
-}, { immediate: true });
+const favorites: FavoriteItem[] = [];
 </script>
 
 <style scoped>
@@ -82,16 +50,6 @@ watch(favoritesData, (newData) => {
   padding: 1.5rem;
   border-radius: var(--border-radius);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.item-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: var(--border-radius);
 }
 
 h1 {
@@ -112,19 +70,5 @@ h2 {
 
 .description {
   color: #666;
-}
-
-.remove-button {
-  background-color: #ff4444;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.remove-button:hover {
-  background-color: #cc0000;
 }
 </style> 

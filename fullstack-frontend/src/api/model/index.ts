@@ -6,7 +6,6 @@
  */
 
 export * from './addCategoriesToItem200';
-export * from './addToFavorites200';
 export * from './category';
 export * from './categoryResponseDTO';
 export * from './createItem200';
@@ -15,10 +14,8 @@ export * from './deleteItem200';
 export * from './deleteUserByEmail200';
 export * from './favorite';
 export * from './getItemById200';
-export * from './getUserFavorites200';
 export * from './getUserItems200';
 export * from './image';
-export * from './isItemFavorited200';
 export * from './item';
 export * from './itemResponseDTO';
 export * from './itemResponseDTOStatus';
@@ -28,7 +25,6 @@ export * from './message';
 export * from './order';
 export * from './orderStatus';
 export * from './removeAdminRole200';
-export * from './removeFromFavorites200';
 export * from './updateEmailRequest';
 export * from './updatePasswordRequest';
 export * from './updateUsernameRequest';

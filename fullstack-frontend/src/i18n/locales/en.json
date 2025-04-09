@@ -94,9 +94,8 @@
         "categorySportsDesc": "Sports equipment and accessories"
     },
     "favoritesView": {
-        "title": "My Favorites",
-        "emptyState": "You haven't added any items to your favorites yet.",
-        "remove": "Remove from Favorites"
+        "title": "Your Favorites",
+        "emptyState": "You haven't added any items to your favorites yet."
     },
     "messagesView": {
         "title": "Messages",
