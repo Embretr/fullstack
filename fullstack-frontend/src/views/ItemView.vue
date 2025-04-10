@@ -4,6 +4,7 @@ import { useGetItemById, useIsItemFavorited, useAddToFavorites, useRemoveFromFav
 import { computed, onMounted } from 'vue';
 import type { ItemResponseDTO } from '../api/model/itemResponseDTO';
 import { useAuthStore } from '@/stores/auth';
+import { RouterLink } from 'vue-router';
 
 const route = useRoute();
 const itemId = computed(() => route.params.id as string);
@@ -78,13 +79,31 @@ onMounted(() => {
           <h3>Seller Information</h3>
           <p>Posted by: {{ typedItemData.owner?.username || 'Anonymous' }}</p>
         </div>
-        <button 
-          v-if="isAuthenticated" 
-          @click="toggleFavorite" 
-          :class="['favorite-button', { 'is-favorite': isFavorited }]"
-        >
-          {{ isFavorited ? 'Remove from Favorites' : 'Add to Favorites' }}
-        </button>
+        <div class="action-buttons">
+          <button 
+            v-if="isAuthenticated" 
+            @click="toggleFavorite" 
+            :class="['favorite-button', { 'is-favorite': isFavorited }]"
+          >
+            {{ isFavorited ? 'Remove from Favorites' : 'Add to Favorites' }}
+          </button>
+          <RouterLink 
+            v-if="isAuthenticated && typedItemData.owner" 
+            :to="{ 
+              name: 'Chat', 
+              params: { 
+                itemId: itemId, 
+                receiverId: typedItemData.owner.id,
+                sellerId: typedItemData.owner.id,
+                itemPrice: typedItemData.price,
+                itemTitle: typedItemData.title
+              } 
+            }"
+            class="chat-button"
+          >
+            Chat with Seller
+          </RouterLink>
+        </div>
       </div>
     </div>
   </div>
@@ -156,6 +175,8 @@ h3 {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.2s;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .favorite-button:hover {
@@ -168,6 +189,31 @@ h3 {
 
 .favorite-button.is-favorite:hover {
   background-color: #cc0000;
+}
+
+.chat-button {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.chat-button:hover {
+  background-color: var(--primary-color-hover);
+}
+
+.action-buttons {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 768px) {

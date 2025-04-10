@@ -35,7 +35,8 @@ import type {
 } from 'vue';
 
 import type {
-  User
+  User,
+  UserResponse
 } from '.././model';
 
 
@@ -233,7 +234,7 @@ export const useLogin = <TError = AxiosError<string>,
  */
 export const getMe = (
      options?: AxiosRequestConfig
- ): Promise<AxiosResponse<User>> => {
+ ): Promise<AxiosResponse<UserResponse>> => {
     
     
     return axios.default.get(

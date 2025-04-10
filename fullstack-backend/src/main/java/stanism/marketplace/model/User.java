@@ -12,9 +12,16 @@ import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Entity class representing a user in the marketplace.
@@ -23,18 +30,20 @@ import lombok.Setter;
  */
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
-  /** Unique identifier for the user.
+  /**
+   * Unique identifier for the user.
    * -- GETTER --
-   *  Gets the unique identifier of the user.
+   * Gets the unique identifier of the user.
    *
    *
    * -- SETTER --
-   *  Sets the unique identifier of the user.
+   * Sets the unique identifier of the user.
    *
-   @return The user's ID
-    * @param id The user's ID to set
+   * @return The user's ID
+   * @param id
+   *          The user's ID to set
    */
   @Setter
   @Getter
@@ -59,29 +68,31 @@ public class User {
   @Size(min = 6, message = "Password must be at least 6 characters")
   private String password;
 
-    /** Role of the user (e.g., ADMIN, USER). */
+  /** Role of the user (e.g., ADMIN, USER). */
   @Enumerated(EnumType.STRING)
-    private Role role;
+  private Role role;
 
-    /** Set of items listed by this user. */
-    @OneToMany(mappedBy = "user")
-    private Set<Item> items;
+  /** Set of items listed by this user. */
+  @OneToMany(mappedBy = "user")
+  private Set<Item> items;
 
-    /** Set of items favorited by this user. */
-    @OneToMany(mappedBy = "user")
-    private Set<Favorite> favorites;
+  /** Set of items favorited by this user. */
+  @OneToMany(mappedBy = "user")
+  private Set<Favorite> favorites;
 
-    /** Set of messages sent by this user. */
-    @OneToMany(mappedBy = "sender")
-    private Set<Message> sentMessages;
+  /** Set of messages sent by this user. */
+  @OneToMany(mappedBy = "sender")
+  @JsonIgnore
+  private Set<Message> sentMessages;
 
-    /** Set of messages received by this user. */
-    @OneToMany(mappedBy = "receiver")
-    private Set<Message> receivedMessages;
+  /** Set of messages received by this user. */
+  @OneToMany(mappedBy = "receiver")
+  @JsonIgnore
+  private Set<Message> receivedMessages;
 
-    /** Set of orders placed by this user. */
-    @OneToMany(mappedBy = "buyer")
-    private Set<Order> orders;
+  /** Set of orders placed by this user. */
+  @OneToMany(mappedBy = "buyer")
+  private Set<Order> orders;
 
   /**
    * Default constructor required by JPA.
@@ -92,10 +103,14 @@ public class User {
   /**
    * Constructs a new User with the specified details.
    *
-   * @param username The username of the user
-   * @param email    The email address of the user
-   * @param password The password of the user
-   * @param role     The role of the user (e.g., ADMIN, USER)
+   * @param username
+   *          The username of the user
+   * @param email
+   *          The email address of the user
+   * @param password
+   *          The password of the user
+   * @param role
+   *          The role of the user (e.g., ADMIN, USER)
    */
   public User(String username, String email, String password, Role role) {
     this.username = username;
@@ -104,19 +119,20 @@ public class User {
     this.role = role;
   }
 
-    /**
+  /**
    * Gets the username of the user.
    *
    * @return The user's username
    */
   public String getUsername() {
-    return username;
+    return email;
   }
 
   /**
    * Sets the username of the user.
    *
-   * @param username The username to set
+   * @param username
+   *          The username to set
    */
   public void setUsername(String username) {
     this.username = username;
@@ -132,9 +148,19 @@ public class User {
   }
 
   /**
+   * Gets the unique identifier of the user.
+   *
+   * @return The user's ID
+   */
+  public Long getId() {
+    return id;
+  }
+
+  /**
    * Sets the email address of the user.
    *
-   * @param email The email address to set
+   * @param email
+   *          The email address to set
    */
   public void setEmail(String email) {
     this.email = email;
@@ -152,28 +178,31 @@ public class User {
   /**
    * Sets the password of the user.
    *
-   * @param password The password to set
+   * @param password
+   *          The password to set
    */
   public void setPassword(String password) {
     this.password = password;
   }
 
-    /**
-     * Gets the role of the user.
-     *
-     * @return The user's role
-     */
-    public Role getRole() {
-        return role;
-    }
-    /**
-     * Sets the role of the user.
-     *
-     * @param role The role to set
-     */
-    public void setRole(Role role) {
-        this.role = role;
-    }
+  /**
+   * Gets the role of the user.
+   *
+   * @return The user's role
+   */
+  public Role getRole() {
+    return role;
+  }
+
+  /**
+   * Sets the role of the user.
+   *
+   * @param role
+   *          The role to set
+   */
+  public void setRole(Role role) {
+    this.role = role;
+  }
 
   /**
    * Returns a string representation of the user.
@@ -228,5 +257,38 @@ public class User {
 
   public void setOrders(Set<Order> orders) {
     this.orders = orders;
+  }
+
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority(role.name()));
+  }
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return true;
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return true;
+  }
+
+  public String getDisplayUsername() {
+    return username;
+  }
+
+  public void setDisplayUsername(String username) {
+    this.username = username;
   }
 }

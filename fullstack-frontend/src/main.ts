@@ -1,3 +1,7 @@
+// Polyfill for SockJS
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+;(window as any).global = window
+
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
@@ -6,6 +10,8 @@ import { createApp } from 'vue'
 // import { createI18n } from 'vue-i18n' // Removed direct import
 import i18n from './i18n' // Import the configured i18n instance
 import { setupVueQuery } from './plugins/vue-query'
+
+import { useAuthStore } from '@/stores/auth';
 
 import './assets/main.css'
 
@@ -33,7 +39,16 @@ axios.interceptors.request.use((config) => {
 const app = createApp(App)
 
 // Create and use Pinia store
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
+
+// Initialize auth store
+const authStore = useAuthStore()
+authStore.initialize()
+
+// Initialize auth store
+const authStore = useAuthStore();
+authStore.initialize();
 
 // Use router
 app.use(router)
@@ -45,4 +60,4 @@ app.use(i18n) // Use the imported i18n instance
 setupVueQuery(app)
 
 // Mount app
-app.mount('#app') 
+app.mount('#app')

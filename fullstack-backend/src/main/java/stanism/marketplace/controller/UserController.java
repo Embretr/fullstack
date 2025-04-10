@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,10 +35,10 @@ public class UserController {
 
     /** Service for handling user-related operations. */
     private final UserService userService;
-    
+
     /** Utility for JWT token operations. */
     private final JwtUtil jwtUtil;
-    
+
     /** Repository for user data access. */
     private final UserRepository userRepository;
 
@@ -46,6 +47,7 @@ public class UserController {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
     }
+
 
     @GetMapping("/{email}")
     @Operation(summary = "Get user by email",
@@ -67,15 +69,9 @@ public class UserController {
                             schema = @Schema(implementation = String.class),
                             examples = @ExampleObject("Invalid token")))
     })
-    public ResponseEntity<?> getUserByEmail(
-            @RequestHeader(value = "Authorization", required = false) String token,
-            @PathVariable String email) {
-        if (token == null || token.trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No token provided");
-        }
-        
-        if (!jwtUtil.validateToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email is required");
         }
 
         Optional<User> userOptional = userService.findUserByEmail(email);
@@ -86,20 +82,13 @@ public class UserController {
         return ResponseEntity.ok(userOptional.get());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{email}/admin")
     @Operation(summary = "Make user admin",
             description = "Updates the role of the user with the specified email to ADMIN.",
             security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<?> makeUserAdmin(
-            @RequestHeader(value = "Authorization") String token,
-            @PathVariable String email) {
-       
-        String jwtToken = token.substring(7);
-        if (!jwtUtil.validateToken(jwtToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
-
-        Optional<User> userOptional = userRepository.findByEmail(email.toLowerCase().trim());    
+    public ResponseEntity<?> makeUserAdmin(@PathVariable String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email.toLowerCase().trim());
         if (userOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("User with email " + email + " not found");
@@ -112,20 +101,12 @@ public class UserController {
         return ResponseEntity.ok("User role updated to ADMIN successfully");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{email}")
     @Operation(summary = "Delete user by email",
             description = "Deletes the user with the specified email.",
             security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<?> deleteUserByEmail(
-            @RequestHeader(value = "Authorization", required = false) String token,
-            @PathVariable String email) {
-        if (token == null || token.trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No token provided");
-        }
-        
-        if (!jwtUtil.validateToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
+    public ResponseEntity<?> deleteUserByEmail(@PathVariable String email) {
 
         Optional<User> userOptional = userRepository.findByEmail(email.toLowerCase().trim());
         if (userOptional.isEmpty()) {
@@ -146,7 +127,7 @@ public class UserController {
         if (token == null || token.trim().isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No token provided");
         }
-       
+
         if (!jwtUtil.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
@@ -165,4 +146,30 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is not an admin");
         }
     }
-} 
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping
+    @Operation(summary = "Get all users",
+            description = "Retrieves a list of all users.",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Users retrieved successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = User.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized - No token or invalid token",
+                    content = @Content(mediaType = "text/plain",
+                            schema = @Schema(implementation = String.class),
+                            examples = @ExampleObject("Invalid token"))),
+            @ApiResponse(responseCode = "403",
+                    description = "Forbidden - Insufficient permissions",
+                    content = @Content(mediaType = "text/plain",
+                            schema = @Schema(implementation = String.class),
+                            examples = @ExampleObject("Access denied")))
+    })
+    public ResponseEntity<?> getAllUsers() {
+        Iterable<User> users = userRepository.findAll();
+        return ResponseEntity.ok(users);
+    }
+}

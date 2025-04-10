@@ -47,6 +47,16 @@
           :placeholder="$t('userSettings.confirmNewPasswordPlaceholder')"
         />
       </div>
+
+      <!-- Language Switcher -->
+      <div class="language-switcher">
+        <label for="language-select">{{ $t('navbar.language') }}:</label>
+        <select id="language-select" v-model="selectedLanguage" @change="changeLanguage">
+          <option value="en">English</option>
+          <option value="no">Norsk</option>
+        </select>
+      </div>
+
       <button type="submit" class="submit-btn">{{ $t('userSettings.saveButton') }}</button>
     </form>
   </div>
@@ -61,12 +71,13 @@ import { useUpdatePassword } from '../api/user-profile/user-profile';
 import type { UpdateUsernameRequest, UpdateEmailRequest, UpdatePasswordRequest } from '../api/model';
 import type { AxiosError } from 'axios';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const name = ref('');
 const email = ref('');
 const password = ref('');
 const currentPassword = ref('');
 const confirmPassword = ref('');
+const selectedLanguage = ref(locale.value); // Bind the current locale to the dropdown
 
 const { mutate: updateUsername } = useUpdateUsername({
   mutation: {
@@ -145,6 +156,10 @@ const updateSettings = async () => {
     alert(t('userSettings.errorDefault'));
   }
 };
+
+const changeLanguage = () => {
+  locale.value = selectedLanguage.value; // Update the locale dynamically
+};
 </script>
 
 <style scoped>
@@ -166,13 +181,18 @@ h1 {
   margin-bottom: 1rem;
 }
 
+.language-switcher {
+  margin-bottom: 1rem;
+}
+
 label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: bold;
 }
 
-input {
+input,
+select {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ddd;

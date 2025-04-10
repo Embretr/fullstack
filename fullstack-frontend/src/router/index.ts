@@ -30,6 +30,12 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/chat/:itemId/:receiverId/:sellerId/:itemPrice/:itemTitle',
+    name: 'Chat',
+    component: () => import('../views/ChatView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/LoginView.vue')
@@ -45,13 +51,13 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/ProfileView.vue'),
   },
   {
-    path: '/userSettings',
+    path: '/settings',
     name: 'UserSettings',
     component: () => import('../views/UserSettingsView.vue'),
   },
   {
-    path: '/createItem',
-    name: 'CreateItem',
+    path: '/listItem',
+    name: 'ListItem',
     component: () => import('../views/CreateItemView.vue'),
   },
   {

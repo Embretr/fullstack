@@ -38,7 +38,7 @@ import type {
   UpdateEmailRequest,
   UpdatePasswordRequest,
   UpdateUsernameRequest,
-  User
+  UserResponse
 } from '.././model';
 
 
@@ -361,7 +361,7 @@ export function useGetUserName<TData = Awaited<ReturnType<typeof getUserName>>, 
  */
 export const getCurrentUserProfile = (
      options?: AxiosRequestConfig
- ): Promise<AxiosResponse<User>> => {
+ ): Promise<AxiosResponse<UserResponse>> => {
     
     
     return axios.default.get(
