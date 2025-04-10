@@ -27,9 +27,9 @@ export interface User {
   favorites?: Favorite[];
   orders?: Order[];
   enabled?: boolean;
-  authorities?: GrantedAuthority[];
-  accountNonLocked?: boolean;
-  accountNonExpired?: boolean;
   credentialsNonExpired?: boolean;
+  authorities?: GrantedAuthority[];
+  accountNonExpired?: boolean;
+  accountNonLocked?: boolean;
   displayUsername?: string;
 }

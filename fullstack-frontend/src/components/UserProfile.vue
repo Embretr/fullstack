@@ -26,7 +26,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useGetUserItems } from '../api/item-management/item-management';
 import { useGetMe } from '../api/authentication/authentication';
-import type { Item } from '../api/model';
+import type { ItemResponseDTO } from '../api/model/itemResponseDTO';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -48,15 +48,15 @@ const { data: itemsData } = useGetUserItems({
 });
 
 // Compute user items with proper typing
-const userItems = computed<Item[]>(() => {
+const userItems = computed<ItemResponseDTO[]>(() => {
   if (!itemsData.value?.data) return [];
-  return (itemsData.value.data as unknown as Item[]) || [];
+  return (itemsData.value.data as unknown as ItemResponseDTO[]) || [];
 });
 
 // Helper function to get item image URL
-const getItemImageUrl = (item: Item): string => {
-  if (!item.images?.length) return 'default-image-url.jpg';
-  const image = item.images[0];
+const getItemImageUrl = (item: ItemResponseDTO): string => {
+  if (!item.imageUrls?.length) return 'default-image-url.jpg';
+  const image = item.imageUrls[0];
   return image ? `/api/items/images/${image}` : 'default-image-url.jpg';
 };
 

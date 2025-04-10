@@ -17,6 +17,8 @@
   },
   "dependencies": {
     "@stomp/stompjs": "^7.1.1",
+    "@tanstack/vue-query": "^5.72.1",
+    "@vippsmobilepay/sdk": "^2.4.2",
     "@tanstack/vue-query": "^5.73.0",
     "@vue/reactivity": "^3.5.13",
     "axios": "^1.6.7",
