@@ -1,3 +1,7 @@
+// Polyfill for SockJS
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+;(window as any).global = window
+
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'

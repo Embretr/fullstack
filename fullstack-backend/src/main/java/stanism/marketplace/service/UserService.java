@@ -31,8 +31,10 @@ public class UserService {
   /**
    * Constructs a new UserService instance.
    *
-   * @param userRepository The user repository to use
-   * @param passwordEncoder The password encoder to use
+   * @param userRepository
+   *          The user repository to use
+   * @param passwordEncoder
+   *          The password encoder to use
    */
   public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
@@ -42,11 +44,15 @@ public class UserService {
   /**
    * Registers a new user with the provided credentials.
    *
-   * @param username The username for the new user
-   * @param email    The email address for the new user
-   * @param password The password for the new user
+   * @param username
+   *          The username for the new user
+   * @param email
+   *          The email address for the new user
+   * @param password
+   *          The password for the new user
    * @return The newly registered user
-   * @throws RuntimeException if username or email is already in use
+   * @throws RuntimeException
+   *           if username or email is already in use
    */
   @Transactional
   public User registerUser(String username, String email, String password) {
@@ -63,9 +69,12 @@ public class UserService {
   /**
    * Registers a new admin user with the provided credentials.
    *
-   * @param username The username for the new admin user
-   * @param email    The email address for the new admin user
-   * @param password The password for the new admin user
+   * @param username
+   *          The username for the new admin user
+   * @param email
+   *          The email address for the new admin user
+   * @param password
+   *          The password for the new admin user
    * @return The newly registered admin user
    */
   @Transactional
@@ -77,7 +86,8 @@ public class UserService {
   /**
    * Finds a user by their username.
    *
-   * @param username The username to search for
+   * @param username
+   *          The username to search for
    * @return An Optional containing the user if found
    */
   public Optional<User> findUser(String username) {
@@ -87,7 +97,8 @@ public class UserService {
   /**
    * Finds a user by their email.
    *
-   * @param email The email to search for
+   * @param email
+   *          The email to search for
    * @return An Optional containing the user if found
    */
   public Optional<User> findUserByEmail(String email) {
@@ -97,8 +108,10 @@ public class UserService {
   /**
    * Updates an existing user's information.
    *
-   * @param user The user with updated information
-   * @throws RuntimeException if the user is not found
+   * @param user
+   *          The user with updated information
+   * @throws RuntimeException
+   *           if the user is not found
    */
   @Transactional
   public void updateUser(User user) {
@@ -120,8 +133,10 @@ public class UserService {
   /**
    * Verifies a user's credentials using email and password.
    *
-   * @param email    The email address to verify
-   * @param password The password to verify
+   * @param email
+   *          The email address to verify
+   * @param password
+   *          The password to verify
    * @return true if the credentials are valid, false otherwise
    */
   public boolean verifyUserByEmail(String email, String password) {
@@ -138,5 +153,27 @@ public class UserService {
     String email = SecurityContextHolder.getContext().getAuthentication().getName();
     LOGGER.info("Getting current user with email: {}", email);
     return findUserByEmail(email);
+  }
+
+  /**
+   * Gets a user by their ID.
+   *
+   * @param id
+   *          The ID of the user to retrieve
+   * @return An Optional containing the user if found
+   */
+  public Optional<User> getUserById(Long id) {
+    return userRepository.findById(id);
+  }
+
+  /**
+   * Gets a user by their email.
+   *
+   * @param email
+   *          The email of the user to retrieve
+   * @return An Optional containing the user if found
+   */
+  public Optional<User> getUserByEmail(String email) {
+    return userRepository.findByEmail(email);
   }
 }
