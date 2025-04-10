@@ -43,10 +43,6 @@ const pinia = createPinia()
 app.use(pinia)
 
 // Initialize auth store
-const authStore = useAuthStore()
-authStore.initialize()
-
-// Initialize auth store
 const authStore = useAuthStore();
 authStore.initialize();
 
