@@ -51,13 +51,13 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/ProfileView.vue'),
   },
   {
-    path: '/userSettings',
+    path: '/settings',
     name: 'UserSettings',
     component: () => import('../views/UserSettingsView.vue'),
   },
   {
-    path: '/createItem',
-    name: 'CreateItem',
+    path: '/listItem',
+    name: 'ListItem',
     component: () => import('../views/CreateItemView.vue'),
   },
   {

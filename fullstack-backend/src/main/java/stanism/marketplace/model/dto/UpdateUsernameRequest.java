@@ -18,4 +18,23 @@ public class UpdateUsernameRequest {
             example = "new_john_doe",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String newUsername;
+
+
+    /**
+     * Gets the new desired username.
+     *
+     * @return The new desired username.
+     */
+    public String getNewUsername() {
+        return newUsername;
+    }
+
+    /**
+     * Sets the new desired username.
+     *
+     * @param newUsername The new desired username.
+     */
+    public void setNewUsername(String newUsername) {
+        this.newUsername = newUsername;
+    }
 }

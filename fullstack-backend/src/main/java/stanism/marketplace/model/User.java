@@ -148,6 +148,15 @@ public class User implements UserDetails {
   }
 
   /**
+   * Gets the unique identifier of the user.
+   *
+   * @return The user's ID
+   */
+  public Long getId() {
+    return id;
+  }
+
+  /**
    * Sets the email address of the user.
    *
    * @param email

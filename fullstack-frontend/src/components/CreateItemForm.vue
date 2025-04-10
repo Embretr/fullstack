@@ -18,6 +18,16 @@ const handleFileChange = (event: Event) => {
   }
 };
 
+const validatePriceInput = () => {
+  // Remove any non-numeric characters except for the decimal point
+  itemPrice.value = itemPrice.value.toString().replace(/[^0-9.]/g, '');
+
+  // Ensure only one decimal point is allowed
+  if ((itemPrice.value.match(/\./g) || []).length > 1) {
+    itemPrice.value = itemPrice.value.slice(0, -1);
+  }
+};
+
 const { mutate: createItemMutation } = useCreateItem({
   mutation: {
     onSuccess: (data) => {
@@ -81,7 +91,14 @@ const handleSubmit = async () => {
       </div>
       <div class="form-group">
         <label for="price">{{ $t('createItemForm.priceLabel') }}</label>
-        <input type="number" step="0.01" id="price" v-model.number="itemPrice" required />
+        <input
+          type="text"
+          id="price"
+          v-model="itemPrice"
+          @input="validatePriceInput"
+          placeholder="Enter price"
+          required
+        />
       </div>
       <div class="form-group">
         <label for="category">{{ $t('createItemForm.categoryLabel') }}</label>

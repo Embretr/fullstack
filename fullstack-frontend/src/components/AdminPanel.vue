@@ -8,6 +8,7 @@ import { useGetUserByEmail } from '../api/user-management/user-management';
 import { useMakeUserAdmin } from '../api/user-management/user-management';
 import { useRemoveAdminRole } from '../api/user-management/user-management';
 import { useDeleteUserByEmail } from '../api/user-management/user-management';
+import { useGetAllUsers } from '../api/user-management/user-management'; // Add API for fetching all users
 import type {  Category } from '../api/model';
 import type { AxiosError } from 'axios';
 
@@ -59,11 +60,11 @@ const newCategoryName = ref('');
 
 const createCategory = async (): Promise<void> => {
   if (!newCategoryName.value.trim()) return;
-  
+
   const category: Category = {
     name: newCategoryName.value.trim()
   };
-  
+
   createCategoryMutation({ data: category });
 };
 
@@ -127,6 +128,15 @@ const deleteUser = async (): Promise<void> => {
   if (!userEmail.value) return;
   if (!confirm('Are you sure you want to delete this user?')) return;
   deleteUserMutation({ email: userEmail.value });
+};
+
+// Fetch all users
+const { data: users, isLoading: usersLoading, error: usersError } = useGetAllUsers();
+
+// Toggle users visibility
+const showUsers = ref(false); // Controls whether users are displayed
+const toggleUsers = () => {
+  showUsers.value = !showUsers.value;
 };
 
 // Computed property to filter items
@@ -320,6 +330,39 @@ const filteredItems = computed(() => {
           Delete User
         </button>
       </div>
+
+      <button @click="toggleUsers" class="toggle-users-btn">
+        {{ showUsers ? 'Hide Users' : 'Show Users' }}
+      </button>
+
+      <div v-if="usersLoading" class="loading-state">
+        <p>Loading users...</p>
+      </div>
+
+      <p v-if="usersError" class="user-error">{{ usersError.message }}</p>
+
+      <table v-if="showUsers && users?.data?.length" class="users-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="user in users.data" :key="user.id">
+            <td>{{ user.id }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.role }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p v-else-if="showUsers && !users?.data?.length" class="no-users-message">
+        No users found.
+      </p>
     </section>
   </div>
 </template>
@@ -486,20 +529,21 @@ h3 {
   margin-bottom: 1rem;
 }
 
-.items-table, .categories-table {
+.items-table, .categories-table, .users-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 1rem;
 }
 
 .items-table th, .items-table td,
-.categories-table th, .categories-table td {
+.categories-table th, .categories-table td,
+.users-table th, .users-table td {
   border: 1px solid #ddd;
   padding: 0.75rem;
   text-align: left;
 }
 
-.items-table th, .categories-table th {
+.items-table th, .categories-table th, .users-table th {
   background-color: #f2f2f2;
   font-weight: bold;
 }
@@ -530,7 +574,7 @@ h3 {
   color: #666;
 }
 
-.no-items-message, .no-categories-message {
+.no-items-message, .no-categories-message, .no-users-message {
   padding: 1rem;
   text-align: center;
   color: #666;
@@ -582,5 +626,20 @@ h3 {
   padding: 1rem;
   background-color: #ffebee;
   border-radius: 4px;
+}
+
+.toggle-users-btn {
+  padding: 0.5rem 1rem;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.toggle-users-btn:hover {
+  background-color: #0b7dda;
 }
 </style>

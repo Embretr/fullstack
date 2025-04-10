@@ -11,7 +11,6 @@ import type { Order } from './order';
 import type { GrantedAuthority } from './grantedAuthority';
 
 export interface User {
-  id?: number;
   /**
    * @minLength 3
    * @maxLength 20
