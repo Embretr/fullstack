@@ -1,29 +1,52 @@
 package stanism.marketplace.model.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
-
-@Data
-@Schema(description = "Request payload for updating password")
+/**
+ * DTO class for updating a user's password.
+ * This class contains the current and new password fields.
+ */
 public class UpdatePasswordRequest {
-    /**
-     * The current password for verification.
-     */
-    @NotBlank(message = "Current password cannot be blank")
-    @Schema(description = "The current password for verification",
-            example = "currentPassword123",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+        /**
+         * The current password of the user.
+         */
     private String currentPassword;
-
-    /**
-     * The new desired password.
-     */
-    @NotBlank(message = "New password cannot be blank")
-    @Size(min = 8, message = "Password must be at least 8 characters long")
-    @Schema(description = "The new desired password",
-            example = "newSecurePassword123",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+        /**
+         * The new password that the user wants to set.
+         */
     private String newPassword;
+
+        /**
+         * Gets the current password of the user.
+         *
+         * @return The current password.
+         */
+    public String getCurrentPassword() {
+        return currentPassword;
+    }
+
+        /**
+         * Sets the current password of the user.
+         *
+         * @param currentPassword The current password to set.
+         */
+    public void setCurrentPassword(String currentPassword) {
+        this.currentPassword = currentPassword;
+    }
+
+        /**
+         * Gets the new password that the user wants to set.
+         *
+         * @return The new password.
+         */
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+        /**
+         * Sets the new password that the user wants to set.
+         *
+         * @param newPassword The new password to set.
+         */
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
 }

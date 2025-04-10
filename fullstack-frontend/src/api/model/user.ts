@@ -7,11 +7,10 @@
 import type { UserRole } from './userRole';
 import type { Item } from './item';
 import type { Favorite } from './favorite';
-import type { Message } from './message';
 import type { Order } from './order';
+import type { GrantedAuthority } from './grantedAuthority';
 
 export interface User {
-  id?: number;
   /**
    * @minLength 3
    * @maxLength 20
@@ -26,7 +25,11 @@ export interface User {
   role?: UserRole;
   items?: Item[];
   favorites?: Favorite[];
-  sentMessages?: Message[];
-  receivedMessages?: Message[];
   orders?: Order[];
+  enabled?: boolean;
+  authorities?: GrantedAuthority[];
+  accountNonLocked?: boolean;
+  accountNonExpired?: boolean;
+  credentialsNonExpired?: boolean;
+  displayUsername?: string;
 }

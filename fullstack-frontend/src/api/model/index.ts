@@ -17,7 +17,7 @@ export * from './favorite';
 export * from './getItemById200';
 export * from './getUserFavorites200';
 export * from './getUserItems200';
-export * from './image';
+export * from './grantedAuthority';
 export * from './isItemFavorited200';
 export * from './item';
 export * from './itemResponseDTO';

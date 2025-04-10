@@ -20,4 +20,22 @@ public class UpdateEmailRequest {
             example = "new.john.doe@example.com",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String newEmail;
+
+    /**
+     * Gets the new desired email address.
+     *
+     * @return The new desired email address.
+     */
+    public String getNewEmail() {
+        return newEmail;
+    }
+
+    /**
+     * Sets the new desired email address.
+     *
+     * @param newEmail The new desired email address.
+     */
+    public void setNewEmail(String newEmail) {
+        this.newEmail = newEmail;
+    }
 }
