@@ -55,7 +55,6 @@ import { useGetConversation } from '@/api/message-controller/message-controller'
 import type { Message } from '@/api/model/message'
 import VippsPayment from '@/components/VippsPayment.vue'
 import { useRefundPayment } from '@/api/vipps-controller/vipps-controller'
-import type { RefundPaymentParams } from '@/api/model/refundPaymentParams'
 
 const route = useRoute()
 const authStore = useAuthStore()

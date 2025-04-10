@@ -12,7 +12,6 @@
 import { ref } from 'vue';
 import vippsLogo from '../assets/vipps-logo.png';
 import { useInitiatePayment } from '@/api/vipps-controller/vipps-controller'
-import type { InitiatePaymentParams } from '@/api/model/initiatePaymentParams'
 
 interface Props {
   orderId: string;
