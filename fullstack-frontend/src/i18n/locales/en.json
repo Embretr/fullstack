@@ -10,7 +10,11 @@
         "logout": "Logout",
         "login": "Login",
         "register": "Register",
-        "language": "Language"
+        "language": "Language",
+        "menu": "Menu",
+        "adminPanel": "Admin Panel",
+        "settings": "Settings",
+        "listItem": "List Item"
     },
     "logout": {
         "success": "You have been logged out successfully.",
@@ -74,7 +78,13 @@
         "confirmNewPasswordPlaceholder": "Confirm your new password",
         "saveButton": "Save Changes",
         "successMessage": "Settings updated successfully!",
-        "errorDefault": "An error occurred while updating your settings. Please try again."
+        "errorDefault": "An error occurred while updating your settings. Please try again.",
+        "currentPasswordPlaceholder": "Enter your current password",
+        "currentPasswordLabel": "Current Password",
+        "languageLabel": "Language",
+        "languageEnglish": "English",
+        "languageNorwegian": "Norwegian"
+
     },
     "homeView": {
         "welcomeTitle": "Welcome to Marketplace"
