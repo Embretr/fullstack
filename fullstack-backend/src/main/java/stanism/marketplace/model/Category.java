@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Set;
 
 /**
@@ -26,6 +27,7 @@ public class Category {
 
     /** Set of items associated with this category. */
     @OneToMany(mappedBy = "category")
+    @JsonIgnore
     private Set<Item> items;
 
     /**
@@ -40,7 +42,8 @@ public class Category {
     /**
      * Sets the id of the category.
      *
-     * @param id the id to set
+     * @param id
+     *            the id to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -58,7 +61,8 @@ public class Category {
     /**
      * Sets the name of the category.
      *
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name) {
         this.name = name;
@@ -76,7 +80,8 @@ public class Category {
     /**
      * Sets the set of items associated with the category.
      *
-     * @param items the set of items to set
+     * @param items
+     *            the set of items to set
      */
     public void setItems(Set<Item> items) {
         this.items = items;

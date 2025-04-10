@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -57,6 +58,7 @@ public class Item {
     /** User who owns or listed the item. */
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     /** Category to which the item belongs. */
@@ -66,18 +68,22 @@ public class Item {
 
     /** Set of images associated with the item. */
     @OneToMany(mappedBy = "item")
+    @JsonIgnore
     private Set<Image> images;
 
     /** Set of users who have favorited this item. */
     @OneToMany(mappedBy = "item")
+    @JsonIgnore
     private Set<Favorite> favorites;
 
     /** Set of messages related to this item. */
     @OneToMany(mappedBy = "item")
+    @JsonIgnore
     private Set<Message> messages;
 
     /** Set of orders associated with this item. */
     @OneToMany(mappedBy = "item")
+    @JsonIgnore
     private Set<Order> orders;
 
     /**
@@ -89,7 +95,8 @@ public class Item {
     /**
      * Private constructor for Builder pattern.
      *
-     * @param builder the builder instance containing the item properties
+     * @param builder
+     *            the builder instance containing the item properties
      */
     private Item(Builder builder) {
         this.title = builder.title;
@@ -135,7 +142,8 @@ public class Item {
         /**
          * Sets the title of the item being built.
          *
-         * @param title the title of the item
+         * @param title
+         *            the title of the item
          * @return this builder instance for method chaining
          */
         public Builder title(String title) {
@@ -146,7 +154,8 @@ public class Item {
         /**
          * Sets the brief description of the item being built.
          *
-         * @param briefDescription the brief description of the item
+         * @param briefDescription
+         *            the brief description of the item
          * @return this builder instance for method chaining
          */
         public Builder briefDescription(String briefDescription) {
@@ -157,7 +166,8 @@ public class Item {
         /**
          * Sets the full description of the item being built.
          *
-         * @param fullDescription the full description of the item
+         * @param fullDescription
+         *            the full description of the item
          * @return this builder instance for method chaining
          */
         public Builder fullDescription(String fullDescription) {
@@ -168,7 +178,8 @@ public class Item {
         /**
          * Sets the price of the item being built.
          *
-         * @param price the price of the item
+         * @param price
+         *            the price of the item
          * @return this builder instance for method chaining
          */
         public Builder price(Double price) {
@@ -179,7 +190,8 @@ public class Item {
         /**
          * Sets the latitude coordinate of the item's location.
          *
-         * @param latitude the latitude coordinate
+         * @param latitude
+         *            the latitude coordinate
          * @return this builder instance for method chaining
          */
         public Builder latitude(Double latitude) {
@@ -190,7 +202,8 @@ public class Item {
         /**
          * Sets the longitude coordinate of the item's location.
          *
-         * @param longitude the longitude coordinate
+         * @param longitude
+         *            the longitude coordinate
          * @return this builder instance for method chaining
          */
         public Builder longitude(Double longitude) {
@@ -201,7 +214,8 @@ public class Item {
         /**
          * Sets the user who owns or listed the item.
          *
-         * @param user the user who owns the item
+         * @param user
+         *            the user who owns the item
          * @return this builder instance for method chaining
          */
         public Builder user(User user) {
@@ -212,7 +226,8 @@ public class Item {
         /**
          * Sets the category to which the item belongs.
          *
-         * @param category the category of the item
+         * @param category
+         *            the category of the item
          * @return this builder instance for method chaining
          */
         public Builder category(Category category) {
@@ -242,7 +257,8 @@ public class Item {
     /**
      * Sets the unique identifier of this item.
      *
-     * @param id the new ID for the item.
+     * @param id
+     *            the new ID for the item.
      */
     public void setId(Long id) {
         this.id = id;
@@ -260,7 +276,8 @@ public class Item {
     /**
      * Sets the title of this item.
      *
-     * @param title the new title for the item.
+     * @param title
+     *            the new title for the item.
      */
     public void setTitle(String title) {
         this.title = title;
@@ -278,7 +295,8 @@ public class Item {
     /**
      * Sets the brief description of this item.
      *
-     * @param briefDescription the new brief description for the item.
+     * @param briefDescription
+     *            the new brief description for the item.
      */
     public void setBriefDescription(String briefDescription) {
         this.briefDescription = briefDescription;
@@ -296,7 +314,8 @@ public class Item {
     /**
      * Sets the full description of this item.
      *
-     * @param fullDescription the new full description for the item.
+     * @param fullDescription
+     *            the new full description for the item.
      */
     public void setFullDescription(String fullDescription) {
         this.fullDescription = fullDescription;
@@ -314,7 +333,8 @@ public class Item {
     /**
      * Sets the price of this item.
      *
-     * @param price the new price for the item.
+     * @param price
+     *            the new price for the item.
      */
     public void setPrice(Double price) {
         this.price = price;
@@ -332,7 +352,8 @@ public class Item {
     /**
      * Sets the latitude coordinate of this item's location.
      *
-     * @param latitude the new latitude for the item.
+     * @param latitude
+     *            the new latitude for the item.
      */
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
@@ -350,7 +371,8 @@ public class Item {
     /**
      * Sets the longitude coordinate of this item's location.
      *
-     * @param longitude the new longitude for the item.
+     * @param longitude
+     *            the new longitude for the item.
      */
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
@@ -368,7 +390,8 @@ public class Item {
     /**
      * Sets the date and time when this item was published.
      *
-     * @param publishDate the new publish date for the item.
+     * @param publishDate
+     *            the new publish date for the item.
      */
     public void setPublishDate(LocalDateTime publishDate) {
         this.publishDate = publishDate;
@@ -386,7 +409,8 @@ public class Item {
     /**
      * Sets the current status of this item.
      *
-     * @param status the new status for the item.
+     * @param status
+     *            the new status for the item.
      */
     public void setStatus(ItemStatus status) {
         this.status = status;
@@ -404,7 +428,8 @@ public class Item {
     /**
      * Sets the user who owns or listed this item.
      *
-     * @param user the new owner for the item.
+     * @param user
+     *            the new owner for the item.
      */
     public void setUser(User user) {
         this.user = user;
@@ -422,7 +447,8 @@ public class Item {
     /**
      * Sets the category to which this item belongs.
      *
-     * @param category the new category for the item.
+     * @param category
+     *            the new category for the item.
      */
     public void setCategory(Category category) {
         this.category = category;
@@ -440,7 +466,8 @@ public class Item {
     /**
      * Sets the set of images associated with this item.
      *
-     * @param images the new set of images for the item.
+     * @param images
+     *            the new set of images for the item.
      */
     public void setImages(Set<Image> images) {
         this.images = images;
@@ -458,7 +485,8 @@ public class Item {
     /**
      * Sets the set of users who have favorited this item.
      *
-     * @param favorites the new set of favorites for the item.
+     * @param favorites
+     *            the new set of favorites for the item.
      */
     public void setFavorites(Set<Favorite> favorites) {
         this.favorites = favorites;
@@ -476,7 +504,8 @@ public class Item {
     /**
      * Sets the set of messages related to this item.
      *
-     * @param messages the new set of messages for the item.
+     * @param messages
+     *            the new set of messages for the item.
      */
     public void setMessages(Set<Message> messages) {
         this.messages = messages;
@@ -494,7 +523,8 @@ public class Item {
     /**
      * Sets the set of orders associated with this item.
      *
-     * @param orders the new set of orders for the item.
+     * @param orders
+     *            the new set of orders for the item.
      */
     public void setOrders(Set<Order> orders) {
         this.orders = orders;

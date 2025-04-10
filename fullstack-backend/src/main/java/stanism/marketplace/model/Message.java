@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.JoinColumn;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDateTime;
 
 /**
@@ -23,16 +24,19 @@ public class Message {
     /** The user who sent the message. */
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
+    @JsonIgnoreProperties({ "sentMessages", "receivedMessages", "items", "favorites", "orders" })
     private User sender;
 
     /** The user who received the message. */
     @ManyToOne
     @JoinColumn(name = "receiver_id", nullable = false)
+    @JsonIgnoreProperties({ "sentMessages", "receivedMessages", "items", "favorites", "orders" })
     private User receiver;
 
     /** The item this message is related to. */
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
+    @JsonIgnoreProperties({ "messages", "favorites", "orders" })
     private Item item;
 
     /** The content of the message. */
@@ -99,4 +103,4 @@ public class Message {
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
-} 
+}

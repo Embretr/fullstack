@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -17,8 +18,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import stanism.marketplace.model.User;
+import stanism.marketplace.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Security configuration class for the application.
@@ -29,19 +33,21 @@ public class SecurityConfig {
 
     /** JWT filter for authentication. */
     private final JwtFilter jwtFilter;
-    
-    /** User details service for authentication. */
-    private final UserDetailsService userDetailsService;
+
+    /** User repository for user-related operations. */
+    private final UserRepository userRepository;
 
     /**
      * Constructs a new SecurityConfig instance.
      *
-     * @param jwtFilter The JWT filter to use for authentication
-     * @param userDetailsService The user details service for authentication
+     * @param jwtFilter
+     *            The JWT filter to use for authentication
+     * @param userRepository
+     *            The user repository for user-related operations
      */
-    public SecurityConfig(JwtFilter jwtFilter, UserDetailsService userDetailsService) {
+    public SecurityConfig(JwtFilter jwtFilter, UserRepository userRepository) {
         this.jwtFilter = jwtFilter;
-        this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
     }
 
     @Bean
@@ -52,7 +58,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -62,12 +68,25 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> {
+            Optional<User> user = userRepository.findByEmail(username);
+            if (user.isEmpty()) {
+                throw new UsernameNotFoundException("User not found");
+            }
+            return user.get();
+        };
+    }
+
     /**
      * Configures the security filter chain.
      *
-     * @param http The HttpSecurity to configure
+     * @param http
+     *            The HttpSecurity to configure
      * @return The configured SecurityFilterChain
-     * @throws Exception if an error occurs during configuration
+     * @throws Exception
+     *             if an error occurs during configuration
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -82,6 +101,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/**").permitAll()
                 .requestMatchers("/api/admin/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/api/userinfo/**").authenticated()
                 .anyRequest().authenticated());
 
