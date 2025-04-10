@@ -5,7 +5,8 @@
  * OpenAPI spec version: v0
  */
 
-export interface Category {
-  id?: number;
-  name?: string;
-}
+export type InitiatePaymentParams = {
+orderId: string;
+amount: number;
+description: string;
+};

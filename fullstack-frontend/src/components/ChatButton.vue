@@ -12,7 +12,10 @@
         </div>
         <ChatComponent 
           :item-id="itemId" 
-          :receiver-id="itemOwner?.id || 0" 
+          :receiver-id="itemOwner?.id || 0"
+          :item-price="itemPrice"
+          :item-title="itemTitle"
+          :seller-id="itemOwner?.id || 0"
         />
       </div>
     </div>
@@ -27,6 +30,8 @@ import type { UserResponse } from '@/api/model/userResponse'
 interface Props {
   itemId: number
   itemOwner: UserResponse | null
+  itemPrice: number
+  itemTitle: string
 }
 
 defineProps<Props>()

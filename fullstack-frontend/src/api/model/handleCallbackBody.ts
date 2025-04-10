@@ -5,7 +5,4 @@
  * OpenAPI spec version: v0
  */
 
-export interface Category {
-  id?: number;
-  name?: string;
-}
+export type HandleCallbackBody = {[key: string]: { [key: string]: unknown }};

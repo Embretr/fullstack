@@ -5,7 +5,7 @@
  * OpenAPI spec version: v0
  */
 
-export interface Category {
-  id?: number;
-  name?: string;
-}
+export type RefundPaymentParams = {
+orderId: string;
+amount: number;
+};

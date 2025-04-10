@@ -7,8 +7,8 @@
 import type { UserRole } from './userRole';
 import type { Item } from './item';
 import type { Favorite } from './favorite';
-import type { Message } from './message';
 import type { Order } from './order';
+import type { GrantedAuthority } from './grantedAuthority';
 
 export interface User {
   id?: number;
@@ -26,7 +26,11 @@ export interface User {
   role?: UserRole;
   items?: Item[];
   favorites?: Favorite[];
-  sentMessages?: Message[];
-  receivedMessages?: Message[];
   orders?: Order[];
+  enabled?: boolean;
+  credentialsNonExpired?: boolean;
+  authorities?: GrantedAuthority[];
+  accountNonExpired?: boolean;
+  accountNonLocked?: boolean;
+  displayUsername?: string;
 }

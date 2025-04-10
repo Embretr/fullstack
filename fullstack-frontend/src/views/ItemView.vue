@@ -89,7 +89,16 @@ onMounted(() => {
           </button>
           <RouterLink 
             v-if="isAuthenticated && typedItemData.owner" 
-            :to="{ name: 'Chat', params: { itemId: itemId, receiverId: typedItemData.owner.id } }"
+            :to="{ 
+              name: 'Chat', 
+              params: { 
+                itemId: itemId, 
+                receiverId: typedItemData.owner.id,
+                sellerId: typedItemData.owner.id,
+                itemPrice: typedItemData.price,
+                itemTitle: typedItemData.title
+              } 
+            }"
             class="chat-button"
           >
             Chat with Seller

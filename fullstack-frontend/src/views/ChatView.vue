@@ -1,6 +1,26 @@
 <template>
   <div class="chat-page">
     <div class="chat-container">
+      <div class="chat-header">
+        <h2>Chat about Item #{{ itemId }}</h2>
+        <div class="payment-actions" v-if="currentUser">
+          <VippsPayment
+            v-if="isBuyer"
+            :orderId="orderId"
+            :amount="itemPrice"
+            :description="itemDescription"
+            @paymentInitiated="handlePaymentInitiated"
+            @paymentError="handlePaymentError"
+          />
+          <button 
+            v-if="isSeller && hasPayment" 
+            @click="handleRefund" 
+            class="refund-button"
+            :disabled="isRefunding">
+            {{ isRefunding ? 'Processing...' : 'Refund Payment' }}
+          </button>
+        </div>
+      </div>
       <div class="chat-messages" ref="messagesContainer">
         <div v-for="message in messages" :key="message.id" 
              :class="['message', message.sender?.id === currentUser?.id ? 'sent' : 'received']">
@@ -25,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import SockJS from 'sockjs-client'
 import type { IMessage } from '@stomp/stompjs'
@@ -33,18 +53,69 @@ import { Client } from '@stomp/stompjs'
 import { useRoute } from 'vue-router'
 import { useGetConversation } from '@/api/message-controller/message-controller'
 import type { Message } from '@/api/model/message'
+import VippsPayment from '@/components/VippsPayment.vue'
+import { useRefundPayment } from '@/api/vipps-controller/vipps-controller'
+import type { RefundPaymentParams } from '@/api/model/refundPaymentParams'
 
 const route = useRoute()
-const itemId = Number(route.params.itemId)
-const receiverId = Number(route.params.receiverId)
-
 const authStore = useAuthStore()
 const currentUser = authStore.user
+
+const itemId = Number(route.params.itemId)
+const receiverId = Number(route.params.receiverId)
+const sellerId = Number(route.params.sellerId)
+const itemPrice = Number(route.params.itemPrice)
+const itemTitle = route.params.itemTitle as string
+
+console.log('Route params:', route.params)
+console.log('Parsed receiverId:', receiverId, 'Type:', typeof receiverId)
+console.log('Current user:', currentUser, 'Type of currentUser.id:', typeof currentUser?.id)
+
 const messages = ref<Message[]>([])
 const newMessage = ref('')
 const isConnected = ref(false)
 const stompClient = ref<Client | null>(null)
 const messagesContainer = ref<HTMLElement | null>(null)
+const isRefunding = ref(false)
+const hasPayment = ref(false)
+
+// Computed properties
+const isBuyer = computed(() => {
+  console.log('currentUser?.id:', currentUser?.id)
+  console.log('sellerId:', sellerId)
+  console.log('isBuyer computed:', currentUser?.id !== sellerId)
+  return currentUser?.id !== sellerId
+})
+const isSeller = computed(() => currentUser?.id === sellerId)
+const orderId = computed(() => `item-${itemId}-${Date.now()}`)
+const itemDescription = computed(() => `Payment for ${itemTitle}`)
+
+const { mutate: refundPayment } = useRefundPayment()
+
+const handlePaymentInitiated = (url: string) => {
+  window.location.href = url
+}
+
+const handlePaymentError = (error: string) => {
+  console.error('Payment error:', error)
+  // You might want to show this error to the user
+}
+
+const handleRefund = async () => {
+  if (isRefunding.value) return
+  
+  isRefunding.value = true
+  try {
+    await refundPayment({ params: { orderId: orderId.value, amount: itemPrice } })
+    hasPayment.value = false
+    // You might want to show a success message
+  } catch (error) {
+    console.error('Refund error:', error)
+    // You might want to show this error to the user
+  } finally {
+    isRefunding.value = false
+  }
+}
 
 const connect = () => {
   console.log('Attempting to connect to WebSocket...')
@@ -175,6 +246,40 @@ onUnmounted(() => {
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+}
+
+.chat-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.payment-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.refund-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.refund-button:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.refund-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .chat-messages {

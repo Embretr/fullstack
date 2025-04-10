@@ -5,7 +5,4 @@
  * OpenAPI spec version: v0
  */
 
-export interface Category {
-  id?: number;
-  name?: string;
-}
+export type RefundPayment200 = {[key: string]: { [key: string]: unknown }};
