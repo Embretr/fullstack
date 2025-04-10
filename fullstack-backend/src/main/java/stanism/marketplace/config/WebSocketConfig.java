@@ -13,6 +13,10 @@ import stanism.marketplace.security.WebSocketAuthInterceptor;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    /**
+     * 
+     * auth for websocket.
+     */
     private final WebSocketAuthInterceptor webSocketAuthInterceptor;
 
     public WebSocketConfig(WebSocketAuthInterceptor webSocketAuthInterceptor) {

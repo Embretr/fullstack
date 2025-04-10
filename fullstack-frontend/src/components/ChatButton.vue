@@ -29,7 +29,7 @@ interface Props {
   itemOwner: UserResponse | null
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 const showChat = ref(false)
 
 const openChat = () => {

@@ -55,7 +55,9 @@ public class AuthController {
 
         @PostMapping("/login")
         @Operation(summary = "User login",
-                        description = "Authenticates a user based on email and password, sets a JWT token cookie upon success.")
+
+                        description = "Authenticates a user based on email and password," +
+                                        " sets a JWT token cookie upon success.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200",
                                         description = "Login successful",
@@ -158,7 +160,8 @@ public class AuthController {
                                         description = "User registered successfully",
                                         content = @Content(mediaType = "text/plain",
                                                         schema = @Schema(implementation = String.class),
-                                                        examples = @ExampleObject("User has been registered successfully."))),
+                                                        examples = @ExampleObject("User has been registered" +
+                                                                        " successfully."))),
                         @ApiResponse(responseCode = "400",
                                         description = "Registration failed (e.g., email already exists, invalid input)",
                                         content = @Content(mediaType = "text/plain",
