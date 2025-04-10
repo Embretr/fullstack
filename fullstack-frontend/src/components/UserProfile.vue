@@ -3,7 +3,6 @@
     <h1>{{ $t('userProfile.welcome', { userName: userData?.data?.username || '' }) }}</h1>
     <p>{{ $t('userProfile.emailPrefix') }}{{ userData?.data?.email || '' }}</p>
     <button @click="logout" class="button">{{ $t('navbar.logout') }}</button>
-    <button @click="goToSettings" class="button">{{ $t('userProfile.settingsButton') }}</button>
     <button @click="createItem" class="button">{{ $t('userProfile.createItemButton') }}</button>
   </div>
   <h1>My Items</h1>
@@ -73,10 +72,6 @@ const logout = async () => {
   }
 };
 
-const goToSettings = () => {
-  router.push('/userSettings');
-};
-
 const createItem = () => {
   router.push('/createItem');
 };
@@ -89,19 +84,20 @@ const createItem = () => {
 }
 
 .button {
-  background-color: var(--secondary-color);
+  background-color: var(--secondary-color); /* Primary button color */
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: var(--border-radius);
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, transform 0.2s ease;
   margin: 0.5rem;
 }
 
 .button:hover {
-  background-color: var(--secondary-color-hover);
+  background-color: #3a8d6b; /* Replace with a slightly darker shade of your button color */
+  transform: scale(1.02); /* Subtle scaling effect */
 }
 
 .items-list {

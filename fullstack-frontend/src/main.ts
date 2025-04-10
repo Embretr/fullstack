@@ -10,6 +10,7 @@ import { createApp } from 'vue'
 // import { createI18n } from 'vue-i18n' // Removed direct import
 import i18n from './i18n' // Import the configured i18n instance
 import { setupVueQuery } from './plugins/vue-query'
+import { useAuthStore } from '@/stores/auth';
 
 import './assets/main.css'
 
@@ -39,6 +40,10 @@ const app = createApp(App)
 // Create and use Pinia store
 app.use(createPinia())
 
+// Initialize auth store
+const authStore = useAuthStore();
+authStore.initialize();
+
 // Use router
 app.use(router)
 
@@ -49,4 +54,4 @@ app.use(i18n) // Use the imported i18n instance
 setupVueQuery(app)
 
 // Mount app
-app.mount('#app') 
+app.mount('#app')

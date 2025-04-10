@@ -3,9 +3,6 @@ import HomeComponent from '@/components/HomeComponent.vue';
 </script>
 
 <template>
-  <div class="home">
-    <h1>{{ $t('homeView.welcomeTitle') }}</h1>
-  </div>
   <HomeComponent />
 </template>
 
@@ -37,4 +34,4 @@ h1 {
   max-width: 1200px;
   margin: auto;
 }
-</style> 
+</style>
