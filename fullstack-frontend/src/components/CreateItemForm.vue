@@ -1,31 +1,84 @@
 <script setup lang="ts">
-import { ref } from '@vue/reactivity';
+import { ref, computed } from '@vue/reactivity';
+import { onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useCreateItem } from '../api/item-management/item-management';
-import type { CreateItemParams } from '../api/model';
+import { useGetAllCategories } from '../api/category-management/category-management';
+import type { CreateItemParams, CategoryResponseDTO } from '../api/model';
+import axios from 'axios';
 
 const { t } = useI18n();
 const itemName = ref('');
 const itemDescription = ref('');
 const itemPrice = ref(0.0);
-const itemCategory = ref('');
+const itemCategory = ref<number | ''>('');
 const itemImage = ref<File | null>(null);
+const itemImages = ref<File[]>([]);
+const imagePreviews = ref<string[]>([]);
+const MAX_FILE_SIZE = 512 * 1024 * 1024; // 512MB in bytes
+
+// Fetch categories
+const { data: categoriesData } = useGetAllCategories();
+const categories = computed(() => categoriesData.value?.data ?? []);
 
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
-  if (target.files?.[0]) {
-    itemImage.value = target.files[0];
+  if (target.files) {
+    const files = Array.from(target.files);
+    console.log('Selected files:', files);
+    
+    // Check file sizes
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        console.error('File too large:', file.name, file.size);
+        alert(t('createItemForm.errorFileTooLarge'));
+        target.value = ''; // Clear the input
+        itemImages.value = [];
+        imagePreviews.value = [];
+        return;
+      }
+    }
+    
+    itemImages.value = files;
+    console.log('Stored files in itemImages:', itemImages.value);
+    
+    // Create preview URLs
+    imagePreviews.value = [];
+    for (const file of itemImages.value) {
+      const previewUrl = URL.createObjectURL(file);
+      console.log('Created preview URL for:', file.name, previewUrl);
+      imagePreviews.value.push(previewUrl);
+    }
   }
 };
 
+// Clean up preview URLs when component is unmounted
+onUnmounted(() => {
+  for (const url of imagePreviews.value) {
+    URL.revokeObjectURL(url);
+  }
+});
+
+const removeImage = (index: number) => {
+  itemImages.value.splice(index, 1);
+  URL.revokeObjectURL(imagePreviews.value[index]);
+  imagePreviews.value.splice(index, 1);
+};
+
 const validatePriceInput = () => {
+  // Convert to string for manipulation
+  let priceStr = itemPrice.value.toString();
+  
   // Remove any non-numeric characters except for the decimal point
-  itemPrice.value = itemPrice.value.toString().replace(/[^0-9.]/g, '');
+  priceStr = priceStr.replace(/[^0-9.]/g, '');
 
   // Ensure only one decimal point is allowed
-  if ((itemPrice.value.match(/\./g) || []).length > 1) {
-    itemPrice.value = itemPrice.value.slice(0, -1);
+  if ((priceStr.match(/\./g) || []).length > 1) {
+    priceStr = priceStr.slice(0, -1);
   }
+
+  // Convert back to number
+  itemPrice.value = Number.parseFloat(priceStr) || 0;
 };
 
 const { mutate: createItemMutation } = useCreateItem({
@@ -47,33 +100,60 @@ const { mutate: createItemMutation } = useCreateItem({
 });
 
 const handleSubmit = async () => {
-  const token = localStorage.getItem('authToken');
-  if (!token) {
-    alert(t('createItemForm.errorNotLoggedIn'));
-    window.location.href = '/login';
-    return;
-  }
+  console.log('Starting form submission');
+  console.log('Form data:', {
+    title: itemName.value,
+    description: itemDescription.value,
+    price: itemPrice.value,
+    categoryId: itemCategory.value,
+    images: itemImages.value
+  });
 
-  const formData = new FormData();
-  formData.append('name', itemName.value);
-  formData.append('description', itemDescription.value);
-  formData.append('price', itemPrice.value.toString());
-  formData.append('category', itemCategory.value);
-  if (itemImage.value) {
-    formData.append('image', itemImage.value);
-  }
-
-  const params: CreateItemParams = {
-    images: itemImage.value ? [itemImage.value] : [],
-    itemData: JSON.stringify({
-      name: itemName.value,
-      description: itemDescription.value,
-      price: itemPrice.value,
-      category: itemCategory.value
-    })
+  // Create item data
+  const itemData = {
+    title: itemName.value,
+    briefDescription: itemDescription.value,
+    fullDescription: itemDescription.value,
+    price: itemPrice.value,
+    categoryId: Number(itemCategory.value),
+    latitude: 0,
+    longitude: 0
   };
+  console.log('Item data to be sent:', itemData);
 
-  createItemMutation({ params });
+  // Create params for the API client
+  const params: CreateItemParams = {
+    images: itemImages.value,
+    itemData: JSON.stringify(itemData)
+  };
+  console.log('API params:', {
+    images: params.images,
+    itemData: params.itemData
+  });
+
+  // Call the mutation
+  console.log('Calling createItemMutation');
+  createItemMutation({ 
+    params,
+    mutation: {
+      onSuccess: (data) => {
+        console.log('Item created successfully:', data);
+        alert(t('createItemForm.successMessage'));
+        // Clear form fields
+        itemName.value = '';
+        itemDescription.value = '';
+        itemPrice.value = 0;
+        itemCategory.value = '';
+        itemImages.value = [];
+        imagePreviews.value = [];
+      },
+      onError: (error) => {
+        console.error('Error creating item:', error);
+        console.error('Error response:', error.response?.data);
+        alert(t('createItemForm.errorDefault'));
+      }
+    }
+  });
 };
 </script>
 
@@ -104,15 +184,26 @@ const handleSubmit = async () => {
         <label for="category">{{ $t('createItemForm.categoryLabel') }}</label>
         <select id="category" v-model="itemCategory" required>
           <option value="" disabled>{{ $t('createItemForm.categorySelectDefault') }}</option>
-          <option value="electronics">{{ $t('createItemForm.categoryElectronics') }}</option>
-          <option value="clothing">{{ $t('createItemForm.categoryClothing') }}</option>
-          <option value="home">{{ $t('createItemForm.categoryHome') }}</option>
-          <option value="toys">{{ $t('createItemForm.categoryToys') }}</option>
+          <option v-for="category in categories" :key="category.id" :value="category.id">
+            {{ category.name }}
+          </option>
         </select>
       </div>
       <div class="form-group">
-        <label for="image">Upload Image:</label>
-        <input type="file" id="image" @change="handleFileChange" accept="image/*" />
+        <label for="images">Upload Images:</label>
+        <input 
+          type="file" 
+          id="images" 
+          @change="handleFileChange" 
+          accept="image/*" 
+          multiple
+        />
+        <div class="image-previews" v-if="imagePreviews.length > 0">
+          <div v-for="(preview, index) in imagePreviews" :key="index" class="image-preview">
+            <img :src="preview" :alt="'Preview ' + (index + 1)" />
+            <button type="button" @click="removeImage(index)" class="remove-image">×</button>
+          </div>
+        </div>
       </div>
       <button class="submit-btn" type="submit">{{ $t('userProfile.createItemButton') }}</button>
     </form>
@@ -173,5 +264,47 @@ textarea {
 
 .submit-btn:hover {
   background-color: #3aa876;
+}
+
+.image-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.image-preview {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-image {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.remove-image:hover {
+  background-color: rgba(255, 255, 255, 1);
 }
 </style>

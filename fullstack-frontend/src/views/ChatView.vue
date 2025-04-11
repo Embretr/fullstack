@@ -2,13 +2,13 @@
   <div class="chat-page">
     <div class="chat-container">
       <div class="chat-header">
-        <h2>Chat about Item #{{ itemId }}</h2>
+        <h2>{{ $t('chatView.title', { itemName: itemTitle }) }}</h2>
         <div class="payment-actions" v-if="currentUser">
           <VippsPayment
             v-if="isBuyer"
             :orderId="orderId"
             :amount="itemPrice"
-            :description="itemDescription"
+            :description="$t('chatView.paymentFor', { itemName: itemTitle })"
             @paymentInitiated="handlePaymentInitiated"
             @paymentError="handlePaymentError"
           />
@@ -17,7 +17,7 @@
             @click="handleRefund" 
             class="refund-button"
             :disabled="isRefunding">
-            {{ isRefunding ? 'Processing...' : 'Refund Payment' }}
+            {{ isRefunding ? $t('chatView.processing') : $t('chatView.refundPayment') }}
           </button>
         </div>
       </div>
@@ -34,10 +34,10 @@
       <div class="chat-input">
         <input v-model="newMessage" 
                @keyup.enter="sendMessage" 
-               placeholder="Type your message..."
+               :placeholder="$t('chatView.typeMessage')"
                :disabled="!isConnected">
         <button @click="sendMessage" :disabled="!isConnected || !newMessage.trim()">
-          Send
+          {{ $t('chatView.send') }}
         </button>
       </div>
     </div>
@@ -51,11 +51,15 @@ import SockJS from 'sockjs-client'
 import type { IMessage } from '@stomp/stompjs'
 import { Client } from '@stomp/stompjs'
 import { useRoute } from 'vue-router'
-import { useGetConversation } from '@/api/message-controller/message-controller'
-import type { Message } from '@/api/model/message'
+import { useI18n } from 'vue-i18n'
+import type { Message } from '@/types/message'
 import VippsPayment from '@/components/VippsPayment.vue'
 import { useRefundPayment } from '@/api/vipps-controller/vipps-controller'
+import { useGetItemById } from '@/api/item-management/item-management'
+import { useGetConversation } from '@/api/messages/messages'
+import type { MessageResponseDTO } from '@/api/model/messageResponseDTO'
 
+const { t } = useI18n()
 const route = useRoute()
 const authStore = useAuthStore()
 const currentUser = authStore.user
@@ -63,8 +67,6 @@ const currentUser = authStore.user
 const itemId = Number(route.params.itemId)
 const receiverId = Number(route.params.receiverId)
 const sellerId = Number(route.params.sellerId)
-const itemPrice = Number(route.params.itemPrice)
-const itemTitle = route.params.itemTitle as string
 
 console.log('Route params:', route.params)
 console.log('Parsed receiverId:', receiverId, 'Type:', typeof receiverId)
@@ -77,6 +79,7 @@ const stompClient = ref<Client | null>(null)
 const messagesContainer = ref<HTMLElement | null>(null)
 const isRefunding = ref(false)
 const hasPayment = ref(false)
+const itemData = ref<{ title: string; price: number } | null>(null)
 
 // Computed properties
 const isBuyer = computed(() => {
@@ -87,7 +90,8 @@ const isBuyer = computed(() => {
 })
 const isSeller = computed(() => currentUser?.id === sellerId)
 const orderId = computed(() => `item-${itemId}-${Date.now()}`)
-const itemDescription = computed(() => `Payment for ${itemTitle}`)
+const itemTitle = computed(() => itemData.value?.title ?? '')
+const itemPrice = computed(() => itemData.value?.price ?? 0)
 
 const { mutate: refundPayment } = useRefundPayment()
 
@@ -105,7 +109,7 @@ const handleRefund = async () => {
   
   isRefunding.value = true
   try {
-    await refundPayment({ params: { orderId: orderId.value, amount: itemPrice } })
+    await refundPayment({ params: { orderId: orderId.value, amount: itemPrice.value } })
     hasPayment.value = false
     // You might want to show a success message
   } catch (error) {
@@ -197,13 +201,45 @@ const formatTime = (timestamp: string) => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
+const convertToMessage = (dto: MessageResponseDTO): Message => {
+  return {
+    id: dto.id ?? 0,
+    content: dto.content ?? '',
+    timestamp: dto.timestamp ?? new Date().toISOString(),
+    sender: dto.sender ? {
+      id: dto.sender.id ?? 0,
+      username: dto.sender.username ?? ''
+    } : undefined,
+    receiver: dto.receiver ? {
+      id: dto.receiver.id ?? 0,
+      username: dto.receiver.username ?? ''
+    } : undefined,
+    item: dto.item ? {
+      id: dto.item.id ?? 0
+    } : undefined
+  }
+}
+
 const loadMessages = async () => {
   try {
-    const { data, error } = useGetConversation(itemId, receiverId)
-    watch(data, (newData) => {
-      if (newData?.data) {
-        console.log('Loaded messages:', newData.data)
-        messages.value = newData.data
+    const { data: itemDataResponse } = useGetItemById(itemId)
+    const { data: messagesData, error } = useGetConversation(itemId, receiverId)
+    
+    watch([itemDataResponse, messagesData], ([newItemData, newMessagesData]) => {
+      if (newItemData?.data) {
+        const title = newItemData.data.title
+        const price = newItemData.data.price
+        if (typeof title === 'string' && typeof price === 'number') {
+          itemData.value = {
+            title,
+            price
+          }
+        }
+        hasPayment.value = newItemData.data.status === 'SOLD'
+      }
+      if (newMessagesData?.data) {
+        console.log('Loaded messages:', newMessagesData.data)
+        messages.value = newMessagesData.data.map(convertToMessage)
         scrollToBottom()
       }
     }, { immediate: true })

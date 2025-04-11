@@ -10,9 +10,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.Column;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Entity class representing an item in the marketplace.
@@ -48,11 +50,21 @@ public class Item {
     /** Longitude coordinate of the item's location. */
     private Double longitude;
 
-    /** Date and time when the item was published. */
+    /** The date and time when the item was published. */
     private LocalDateTime publishDate;
+
+    /** The date and time when the item was reserved. */
+    private LocalDateTime reservationDate;
+
+    /** The user who reserved the item. */
+    @ManyToOne
+    @JoinColumn(name = "reserved_by_id")
+    @JsonIgnore
+    private User reservedBy;
 
     /** Current status of the item (e.g., ACTIVE, SOLD). */
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private ItemStatus status;
 
     /** User who owns or listed the item. */
@@ -69,27 +81,31 @@ public class Item {
     /** Set of images associated with the item. */
     @OneToMany(mappedBy = "item")
     @JsonIgnore
-    private Set<Image> images;
+    private Set<Image> images = new HashSet<>();
 
     /** Set of users who have favorited this item. */
     @OneToMany(mappedBy = "item")
     @JsonIgnore
-    private Set<Favorite> favorites;
+    private Set<Favorite> favorites = new HashSet<>();
 
     /** Set of messages related to this item. */
     @OneToMany(mappedBy = "item")
     @JsonIgnore
-    private Set<Message> messages;
+    private Set<Message> messages = new HashSet<>();
 
     /** Set of orders associated with this item. */
     @OneToMany(mappedBy = "item")
     @JsonIgnore
-    private Set<Order> orders;
+    private Set<Order> orders = new HashSet<>();
 
     /**
      * Default constructor for JPA.
      */
     public Item() {
+        this.images = new HashSet<>();
+        this.favorites = new HashSet<>();
+        this.messages = new HashSet<>();
+        this.orders = new HashSet<>();
     }
 
     /**
@@ -395,6 +411,44 @@ public class Item {
      */
     public void setPublishDate(LocalDateTime publishDate) {
         this.publishDate = publishDate;
+    }
+
+    /**
+     * Returns the date and time when this item was reserved.
+     *
+     * @return the item's reservation date.
+     */
+    public LocalDateTime getReservationDate() {
+        return reservationDate;
+    }
+
+    /**
+     * Sets the date and time when this item was reserved.
+     *
+     * @param reservationDate
+     *            the new reservation date for the item.
+     */
+    public void setReservationDate(LocalDateTime reservationDate) {
+        this.reservationDate = reservationDate;
+    }
+
+    /**
+     * Returns the user who reserved this item.
+     *
+     * @return the item's reserver.
+     */
+    public User getReservedBy() {
+        return reservedBy;
+    }
+
+    /**
+     * Sets the user who reserved this item.
+     *
+     * @param reservedBy
+     *            the new reserver for the item.
+     */
+    public void setReservedBy(User reservedBy) {
+        this.reservedBy = reservedBy;
     }
 
     /**

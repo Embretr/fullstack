@@ -1,0 +1,5 @@
+{
+  "createItemForm": {
+    "errorFileTooLarge": "One or more files exceed the maximum size limit of 512MB"
+  }
+} 

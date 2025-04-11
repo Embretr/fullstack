@@ -5,16 +5,7 @@
  * OpenAPI spec version: v0
  */
 
-/**
- * Request payload for updating password
- */
 export interface UpdatePasswordRequest {
-  /** The current password for verification */
-  currentPassword: string;
-  /**
-   * The new desired password
-   * @minLength 8
-   * @maxLength 2147483647
-   */
-  newPassword: string;
+  currentPassword?: string;
+  newPassword?: string;
 }

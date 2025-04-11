@@ -2,7 +2,7 @@
   <div class="vipps-payment">
     <button @click="initiatePaymentHandler" class="vipps-button" :disabled="isLoading">
       <img :src="vippsLogo" alt="Vipps" class="vipps-logo" />
-      {{ isLoading ? 'Processing...' : 'Pay with Vipps' }}
+      {{ isLoading ? t('payment.processing') : t('payment.payWithVipps') }}
     </button>
     <div v-if="error" class="error-message">{{ error }}</div>
   </div>
@@ -12,6 +12,9 @@
 import { ref } from 'vue';
 import vippsLogo from '../assets/vipps-logo.png';
 import { useInitiatePayment } from '@/api/vipps-controller/vipps-controller'
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Props {
   orderId: string;
@@ -75,8 +78,11 @@ const initiatePaymentHandler = async () => {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background-color: #FF5B24;
-  color: white;
+  border-color: #FF5B24;
+  background-color: white;
+  border-width: 2px;
+  border-style: solid;
+  color: #FF5B24;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -86,7 +92,9 @@ const initiatePaymentHandler = async () => {
 }
 
 .vipps-button:hover:not(:disabled) {
-  background-color: #E54A1A;
+  background-color: white;
+  border-color: #E54A1A;
+
 }
 
 .vipps-button:disabled {

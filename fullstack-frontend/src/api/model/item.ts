@@ -16,6 +16,7 @@ export interface Item {
   latitude?: number;
   longitude?: number;
   publishDate?: string;
+  reservationDate?: string;
   status?: ItemStatus;
   category?: Category;
 }

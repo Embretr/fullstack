@@ -10,7 +10,11 @@
         "logout": "Logg ut",
         "login": "Logg inn",
         "register": "Registrer",
-        "language": "Språk"
+        "language": "Språk",
+        "menu": "Meny",
+        "adminPanel": "Admin Panel",
+        "settings": "Innstillinger",
+        "listItem": "Legg ut Annonse"
     },
     "logout": {
         "success": "Du har blitt logget ut.",
@@ -74,7 +78,12 @@
         "confirmNewPasswordPlaceholder": "Bekreft det nye passordet",
         "saveButton": "Lagre endringer",
         "successMessage": "Innstillinger oppdatert!",
-        "errorDefault": "En feil oppstod under oppdatering av innstillingene. Vennligst prøv igjen."
+        "errorDefault": "En feil oppstod under oppdatering av innstillingene. Vennligst prøv igjen.",
+        "currentPasswordPlaceholder": "Skriv inn ditt nåværende passord",
+        "currentPasswordLabel": "Nåværende passord",
+        "languageLabel": "Språk",
+        "languageEnglish": "Engelsk",
+        "languageNorwegian": "Norsk"
     },
     "homeView": {
         "welcomeTitle": "Velkommen til Markedsplass"
@@ -95,10 +104,38 @@
     },
     "favoritesView": {
         "title": "Dine favoritter",
-        "emptyState": "Du har ikke lagt til noen gjenstander i favoritter ennå."
+        "emptyState": "Du har ikke lagt til noen gjenstander i favoritter ennå.",
+        "remove": "Fjern fra Favoritter"
     },
     "messagesView": {
         "title": "Meldinger",
         "emptyState": "Du har ingen meldinger ennå."
+    },
+    "chatView": {
+        "title": "Chat om {itemName}",
+        "typeMessage": "Skriv meldingen din...",
+        "send": "Send",
+        "processing": "Behandler...",
+        "refundPayment": "Refunder betaling",
+        "paymentFor": "Betaling for {itemName}"
+    },
+    "payment": {
+        "payWithVipps": "Betal med Vipps",
+        "processing": "Behandler..."
+    },
+    "itemView": {
+        "loading": "Laster varedetaljer...",
+        "description": "Beskrivelse",
+        "sellerInfo": "Selgerinformasjon",
+        "postedBy": "Lagt ut av: {username}",
+        "anonymous": "Anonym",
+        "reservedByYou": "Du har reservert denne varen",
+        "reservedByOther": "Denne varen er reservert",
+        "timeRemaining": "{time} gjenstår",
+        "addToFavorites": "Legg til i favoritter",
+        "removeFromFavorites": "Fjern fra favoritter",
+        "reserveItem": "Reserver vare",
+        "cancelReservation": "Avbryt reservasjon",
+        "chatWithSeller": "Chat med selger"
     }
 }

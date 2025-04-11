@@ -54,7 +54,7 @@ export const makeUserAdmin = (
     email: MaybeRef<string>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<MakeUserAdmin200>> => {
     email = unref(email);
-
+    
     return axios.default.put(
       `/api/users/${email}/admin`,undefined,options
     );
@@ -65,7 +65,7 @@ export const makeUserAdmin = (
 export const getMakeUserAdminMutationOptions = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof makeUserAdmin>>, TError,{email: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof makeUserAdmin>>, TError,{email: string}, TContext> => {
-
+    
 const mutationKey = ['makeUserAdmin'];
 const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
@@ -73,7 +73,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }, axios: undefined};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof makeUserAdmin>>, {email: string}> = (props) => {
@@ -82,13 +82,13 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
           return  makeUserAdmin(email,axiosOptions)
         }
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
 
     export type MakeUserAdminMutationResult = NonNullable<Awaited<ReturnType<typeof makeUserAdmin>>>
-
+    
     export type MakeUserAdminMutationError = AxiosError<unknown>
 
     /**
@@ -115,7 +115,7 @@ export const removeAdminRole = (
     email: MaybeRef<string>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<RemoveAdminRole200>> => {
     email = unref(email);
-
+    
     return axios.default.put(
       `/api/users/${email}/admin/remove`,undefined,options
     );
@@ -126,7 +126,7 @@ export const removeAdminRole = (
 export const getRemoveAdminRoleMutationOptions = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeAdminRole>>, TError,{email: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof removeAdminRole>>, TError,{email: string}, TContext> => {
-
+    
 const mutationKey = ['removeAdminRole'];
 const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
@@ -134,7 +134,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }, axios: undefined};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeAdminRole>>, {email: string}> = (props) => {
@@ -143,13 +143,13 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
           return  removeAdminRole(email,axiosOptions)
         }
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
 
     export type RemoveAdminRoleMutationResult = NonNullable<Awaited<ReturnType<typeof removeAdminRole>>>
-
+    
     export type RemoveAdminRoleMutationError = AxiosError<unknown>
 
     /**
@@ -169,6 +169,68 @@ export const useRemoveAdminRole = <TError = AxiosError<unknown>,
       return useMutation(mutationOptions , queryClient);
     }
     /**
+ * Retrieves a list of all users.
+ * @summary Get all users
+ */
+export const getAllUsers = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<User>> => {
+    
+    
+    return axios.default.get(
+      `/api/users`,options
+    );
+  }
+
+
+export const getGetAllUsersQueryKey = () => {
+    return ['api','users'] as const;
+    }
+
+    
+export const getGetAllUsersQueryOptions = <TData = Awaited<ReturnType<typeof getAllUsers>>, TError = AxiosError<string>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllUsers>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  getGetAllUsersQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAllUsers>>> = ({ signal }) => getAllUsers({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAllUsers>>, TError, TData> 
+}
+
+export type GetAllUsersQueryResult = NonNullable<Awaited<ReturnType<typeof getAllUsers>>>
+export type GetAllUsersQueryError = AxiosError<string>
+
+
+/**
+ * @summary Get all users
+ */
+
+export function useGetAllUsers<TData = Awaited<ReturnType<typeof getAllUsers>>, TError = AxiosError<string>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllUsers>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAllUsersQueryOptions(options)
+
+  const query = useQuery(queryOptions , queryClient) as UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = unref(queryOptions).queryKey as DataTag<QueryKey, TData, TError>;
+
+  return query;
+}
+
+
+
+/**
  * Retrieves the user details for the specified email.
  * @summary Get user by email
  */
@@ -176,28 +238,18 @@ export const getUserByEmail = (
     email: MaybeRef<string>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<User>> => {
     email = unref(email);
-
+    
     return axios.default.get(
       `/api/users/${email}`,options
     );
   }
-
-  export const useGetAllUsers = async () => {
-    try {
-        const response = await axios.default.get('/api/users');
-        return response.data; // Return the data
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        throw error; // Re-throw the error so calling code can handle it
-    }
-};
 
 
 export const getGetUserByEmailQueryKey = (email: MaybeRef<string>,) => {
     return ['api','users',email] as const;
     }
 
-
+    
 export const getGetUserByEmailQueryOptions = <TData = Awaited<ReturnType<typeof getUserByEmail>>, TError = AxiosError<string>>(email: MaybeRef<string>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByEmail>>, TError, TData>>, axios?: AxiosRequestConfig}
 ) => {
 
@@ -205,15 +257,15 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 
   const queryKey =  getGetUserByEmailQueryKey(email);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserByEmail>>> = ({ signal }) => getUserByEmail(email, { signal, ...axiosOptions });
 
+      
 
+      
 
-
-
-   return  { queryKey, queryFn, enabled: computed(() => !!(unref(email))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserByEmail>>, TError, TData>
+   return  { queryKey, queryFn, enabled: computed(() => !!(unref(email))), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserByEmail>>, TError, TData> 
 }
 
 export type GetUserByEmailQueryResult = NonNullable<Awaited<ReturnType<typeof getUserByEmail>>>
@@ -226,7 +278,7 @@ export type GetUserByEmailQueryError = AxiosError<string>
 
 export function useGetUserByEmail<TData = Awaited<ReturnType<typeof getUserByEmail>>, TError = AxiosError<string>>(
  email: MaybeRef<string>, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserByEmail>>, TError, TData>>, axios?: AxiosRequestConfig}
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetUserByEmailQueryOptions(email,options)
@@ -248,7 +300,7 @@ export const deleteUserByEmail = (
     email: MaybeRef<string>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<DeleteUserByEmail200>> => {
     email = unref(email);
-
+    
     return axios.default.delete(
       `/api/users/${email}`,options
     );
@@ -259,7 +311,7 @@ export const deleteUserByEmail = (
 export const getDeleteUserByEmailMutationOptions = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUserByEmail>>, TError,{email: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteUserByEmail>>, TError,{email: string}, TContext> => {
-
+    
 const mutationKey = ['deleteUserByEmail'];
 const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
@@ -267,7 +319,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }, axios: undefined};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteUserByEmail>>, {email: string}> = (props) => {
@@ -276,13 +328,13 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
           return  deleteUserByEmail(email,axiosOptions)
         }
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
 
     export type DeleteUserByEmailMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUserByEmail>>>
-
+    
     export type DeleteUserByEmailMutationError = AxiosError<unknown>
 
     /**
@@ -301,3 +353,4 @@ export const useDeleteUserByEmail = <TError = AxiosError<unknown>,
 
       return useMutation(mutationOptions , queryClient);
     }
+    

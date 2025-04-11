@@ -42,13 +42,10 @@ const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 
-// Initialize auth store
-const authStore = useAuthStore()
-authStore.initialize()
 
-// Initialize auth store
 const authStore = useAuthStore();
 authStore.initialize();
+
 
 // Use router
 app.use(router)
@@ -59,5 +56,7 @@ app.use(i18n) // Use the imported i18n instance
 // Setup Vue Query
 setupVueQuery(app)
 
-// Mount app
-app.mount('#app')
+// Initialize auth and then mount the app
+authStore.initialize().finally(() => {
+  app.mount('#app')
+})

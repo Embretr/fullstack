@@ -111,5 +111,32 @@
     "messagesView": {
         "title": "Messages",
         "emptyState": "You don't have any messages yet."
+    },
+    "chatView": {
+        "title": "Chat about {itemName}",
+        "typeMessage": "Type your message...",
+        "send": "Send",
+        "processing": "Processing...",
+        "refundPayment": "Refund Payment",
+        "paymentFor": "Payment for {itemName}"
+    },
+    "payment": {
+        "payWithVipps": "Pay with Vipps",
+        "processing": "Processing..."
+    },
+    "itemView": {
+        "loading": "Loading item details...",
+        "description": "Description",
+        "sellerInfo": "Seller Information",
+        "postedBy": "Posted by: {username}",
+        "anonymous": "Anonymous",
+        "reservedByYou": "You have reserved this item",
+        "reservedByOther": "This item is reserved",
+        "timeRemaining": "{time} remaining",
+        "addToFavorites": "Add to Favorites",
+        "removeFromFavorites": "Remove from Favorites",
+        "reserveItem": "Reserve Item",
+        "cancelReservation": "Cancel Reservation",
+        "chatWithSeller": "Chat with Seller"
     }
 }

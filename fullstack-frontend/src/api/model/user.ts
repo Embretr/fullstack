@@ -11,6 +11,7 @@ import type { Order } from './order';
 import type { GrantedAuthority } from './grantedAuthority';
 
 export interface User {
+  id?: number;
   /**
    * @minLength 3
    * @maxLength 20
@@ -27,9 +28,9 @@ export interface User {
   favorites?: Favorite[];
   orders?: Order[];
   enabled?: boolean;
-  credentialsNonExpired?: boolean;
   authorities?: GrantedAuthority[];
+  displayUsername?: string;
   accountNonExpired?: boolean;
   accountNonLocked?: boolean;
-  displayUsername?: string;
+  credentialsNonExpired?: boolean;
 }
