@@ -53,7 +53,8 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:3173")
 @Tag(name = "Item Management", description = "Endpoints for managing marketplace items")
 public class ItemController {
-    private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
+    /** Logger for this class. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(ItemController.class);
 
     /** Service for handling item-related operations. */
     private final ItemService itemService;
@@ -150,19 +151,19 @@ public class ItemController {
     public ResponseEntity<?> createItem(
             @RequestParam("images") MultipartFile[] imageFiles,
             @RequestParam("itemData") String itemDataJson) {
-        logger.info("Received create item request with {} images", imageFiles.length);
-        logger.debug("Item data JSON: {}", itemDataJson);
+        LOGGER.info("Received create item request with {} images", imageFiles.length);
+        LOGGER.debug("Item data JSON: {}", itemDataJson);
 
         Optional<User> currentUser = userService.getCurrentUser();
         if (currentUser.isEmpty()) {
-            logger.warn("Create item request failed: User not logged in");
+            LOGGER.warn("Create item request failed: User not logged in");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
         }
 
         try {
             return processItemCreation(imageFiles, itemDataJson, currentUser.get());
         } catch (Exception e) {
-            logger.error("Error creating item: {}", e.getMessage(), e);
+            LOGGER.error("Error creating item: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Error creating item: " + e.getMessage());
         }
@@ -180,38 +181,57 @@ public class ItemController {
             MultipartFile[] imageFiles,
             String itemDataJson,
             User currentUser) throws IOException {
-        logger.info("Processing item creation for user: {}", currentUser.getEmail());
+        LOGGER.info("Processing item creation for user: {}", currentUser.getEmail());
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        CreateItemRequestDTO itemData = objectMapper.readValue(itemDataJson, CreateItemRequestDTO.class);
-        logger.debug("Parsed item data: {}", itemData);
-
-        Optional<Category> category = Optional.ofNullable(
-                categoryService.getCategoryById(itemData.getCategoryId()));
+        CreateItemRequestDTO itemData = parseItemData(itemDataJson);
+        Optional<Category> category = validateCategory(itemData.getCategoryId());
         if (category.isEmpty()) {
-            logger.warn("Category not found for ID: {}", itemData.getCategoryId());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Category not found");
         }
 
-        // Validate images
+        validateImages(imageFiles);
+
+        Item item = createItem(itemData, currentUser, category.get());
+        Item createdItem = saveItemWithImages(item, imageFiles);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
+    }
+
+    private CreateItemRequestDTO parseItemData(String itemDataJson) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        CreateItemRequestDTO itemData = objectMapper.readValue(itemDataJson, CreateItemRequestDTO.class);
+        LOGGER.debug("Parsed item data: {}", itemData);
+        return itemData;
+    }
+
+    private Optional<Category> validateCategory(Long categoryId) {
+        Optional<Category> category = Optional.ofNullable(
+                categoryService.getCategoryById(categoryId));
+        if (category.isEmpty()) {
+            LOGGER.warn("Category not found for ID: {}", categoryId);
+        }
+        return category;
+    }
+
+    private void validateImages(MultipartFile[] imageFiles) {
         for (MultipartFile imageFile : imageFiles) {
-            logger.debug("Validating image: {} ({} bytes)",
+            LOGGER.debug("Validating image: {} ({} bytes)",
                     imageFile.getOriginalFilename(),
                     imageFile.getSize());
 
             if (imageFile.isEmpty()) {
-                logger.warn("Empty image file received");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("One or more image files are empty");
+                LOGGER.warn("Empty image file received");
+                throw new IllegalArgumentException("One or more image files are empty");
             }
             if (!imageFile.getContentType().startsWith("image/")) {
-                logger.warn("Invalid file type received: {}", imageFile.getContentType());
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("One or more files are not images");
+                LOGGER.warn("Invalid file type received: {}", imageFile.getContentType());
+                throw new IllegalArgumentException("One or more files are not images");
             }
         }
+    }
 
+    private Item createItem(CreateItemRequestDTO itemData, User currentUser, Category category) {
         Item item = new Item.Builder()
                 .title(itemData.getTitle())
                 .briefDescription(itemData.getBriefDescription())
@@ -220,55 +240,53 @@ public class ItemController {
                 .latitude(itemData.getLatitude())
                 .longitude(itemData.getLongitude())
                 .user(currentUser)
-                .category(category.get())
+                .category(category)
                 .build();
 
-        logger.info("Created item object: {}", item);
+        LOGGER.info("Created item object: {}", item);
+        return item;
+    }
 
-        // Save the item first to get its ID
+    private Item saveItemWithImages(Item item, MultipartFile[] imageFiles) throws IOException {
         Item createdItem = itemService.saveItem(item);
-        logger.info("Saved item with ID: {}", createdItem.getId());
+        LOGGER.info("Saved item with ID: {}", createdItem.getId());
 
-        // Save and associate images with the item
         for (MultipartFile imageFile : imageFiles) {
             try {
-                logger.debug("Saving image: {}", imageFile.getOriginalFilename());
+                LOGGER.debug("Saving image: {}", imageFile.getOriginalFilename());
                 Image image = saveImage(imageFile, createdItem);
-                image = imageService.saveImage(image); // Save the image to the database
+                image = imageService.saveImage(image);
                 createdItem.getImages().add(image);
-                logger.info("Successfully saved image: {}", image.getImageUrl());
+                LOGGER.info("Successfully saved image: {}", image.getImageUrl());
             } catch (IOException e) {
-                logger.error("Failed to save image: {}", e.getMessage(), e);
-                // If image saving fails, delete the item and return error
+                LOGGER.error("Failed to save image: {}", e.getMessage(), e);
                 itemService.deleteItem(createdItem.getId());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Error saving image: " + e.getMessage());
+                throw e;
             }
         }
 
-        // Update the item with the images
         createdItem = itemService.saveItem(createdItem);
-        logger.info("Successfully created item with {} images", createdItem.getImages().size());
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
+        LOGGER.info("Successfully created item with {} images", createdItem.getImages().size());
+        return createdItem;
     }
 
     private Image saveImage(MultipartFile imageFile, Item item) throws IOException {
-        logger.debug("Saving image file: {}", imageFile.getOriginalFilename());
+        LOGGER.debug("Saving image file: {}", imageFile.getOriginalFilename());
 
         String originalFilename = imageFile.getOriginalFilename();
         String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         String fileName = UUID.randomUUID().toString() + extension;
-        logger.debug("Generated filename: {}", fileName);
+        LOGGER.debug("Generated filename: {}", fileName);
 
         Path filePath = Paths.get("uploads", fileName);
-        logger.debug("Saving to path: {}", filePath);
+        LOGGER.debug("Saving to path: {}", filePath);
 
         Files.createDirectories(filePath.getParent());
         Files.write(filePath, imageFile.getBytes());
-        logger.info("Successfully saved image file to: {}", filePath);
+        LOGGER.info("Successfully saved image file to: {}", filePath);
 
         String imageUrl = "/uploads/" + fileName;
-        logger.debug("Created image URL: {}", imageUrl);
+        LOGGER.debug("Created image URL: {}", imageUrl);
 
         return new Image(item, imageUrl, originalFilename);
     }

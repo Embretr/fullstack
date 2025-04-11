@@ -14,7 +14,7 @@ defineProps<{
       <h3>{{ item.title }}</h3>
       <p>{{ item.briefDescription }}</p>
       <div class="item-meta">
-        <span class="price">${{ item.price }}</span>
+        <span class="price">{{ item.price }} kr</span>
         <span class="category">{{ item.category?.name }}</span>
       </div>
     </div>
