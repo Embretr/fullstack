@@ -42,8 +42,10 @@ const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 
-// Initialize auth store
-const authStore = useAuthStore()
+
+const authStore = useAuthStore();
+authStore.initialize();
+
 
 // Use router
 app.use(router)
