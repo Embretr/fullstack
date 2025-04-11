@@ -37,6 +37,7 @@ import type {
 
 import type {
   AddToFavorites200,
+  CancelReservation200,
   CreateItem200,
   CreateItemParams,
   DeleteItem200,
@@ -45,7 +46,8 @@ import type {
   GetUserItems200,
   IsItemFavorited200,
   ItemResponseDTO,
-  RemoveFromFavorites200
+  RemoveFromFavorites200,
+  ReserveItem200
 } from '.././model';
 
 
@@ -174,6 +176,128 @@ export const useCreateItem = <TError = AxiosError<unknown>,
       > => {
 
       const mutationOptions = getCreateItemMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    /**
+ * Reserves an item for one hour
+ * @summary Reserve item
+ */
+export const reserveItem = (
+    itemId: MaybeRef<number>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ReserveItem200>> => {
+    itemId = unref(itemId);
+    
+    return axios.default.post(
+      `/api/items/${itemId}/reserve`,undefined,options
+    );
+  }
+
+
+
+export const getReserveItemMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reserveItem>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof reserveItem>>, TError,{itemId: number}, TContext> => {
+    
+const mutationKey = ['reserveItem'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reserveItem>>, {itemId: number}> = (props) => {
+          const {itemId} = props ?? {};
+
+          return  reserveItem(itemId,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReserveItemMutationResult = NonNullable<Awaited<ReturnType<typeof reserveItem>>>
+    
+    export type ReserveItemMutationError = AxiosError<unknown>
+
+    /**
+ * @summary Reserve item
+ */
+export const useReserveItem = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reserveItem>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof reserveItem>>,
+        TError,
+        {itemId: number},
+        TContext
+      > => {
+
+      const mutationOptions = getReserveItemMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    /**
+ * Cancels the reservation of an item
+ * @summary Cancel reservation
+ */
+export const cancelReservation = (
+    itemId: MaybeRef<number>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CancelReservation200>> => {
+    itemId = unref(itemId);
+    
+    return axios.default.delete(
+      `/api/items/${itemId}/reserve`,options
+    );
+  }
+
+
+
+export const getCancelReservationMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelReservation>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof cancelReservation>>, TError,{itemId: number}, TContext> => {
+    
+const mutationKey = ['cancelReservation'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancelReservation>>, {itemId: number}> = (props) => {
+          const {itemId} = props ?? {};
+
+          return  cancelReservation(itemId,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CancelReservationMutationResult = NonNullable<Awaited<ReturnType<typeof cancelReservation>>>
+    
+    export type CancelReservationMutationError = AxiosError<unknown>
+
+    /**
+ * @summary Cancel reservation
+ */
+export const useCancelReservation = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelReservation>>, TError,{itemId: number}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof cancelReservation>>,
+        TError,
+        {itemId: number},
+        TContext
+      > => {
+
+      const mutationOptions = getCancelReservationMutationOptions(options);
 
       return useMutation(mutationOptions , queryClient);
     }

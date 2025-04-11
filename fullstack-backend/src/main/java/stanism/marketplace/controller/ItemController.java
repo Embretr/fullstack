@@ -23,6 +23,7 @@ import stanism.marketplace.model.Category;
 import stanism.marketplace.model.Favorite;
 import stanism.marketplace.model.Image;
 import stanism.marketplace.model.Item;
+import stanism.marketplace.model.ItemStatus;
 import stanism.marketplace.model.User;
 import stanism.marketplace.model.dto.CreateItemRequestDTO;
 import stanism.marketplace.model.dto.ItemResponseDTO;
@@ -38,6 +39,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -319,5 +321,78 @@ public class ItemController {
 
         boolean isFavorited = favoriteService.isItemFavorited(currentUser.get(), optionalItem.get());
         return ResponseEntity.ok(isFavorited);
+    }
+
+    @PostMapping("/{itemId}/reserve")
+    @Operation(summary = "Reserve item", description = "Reserves an item for one hour")
+    public ResponseEntity<?> reserveItem(
+            @PathVariable Long itemId) {
+
+        Optional<Item> optionalItem = itemService.getItemById(itemId);
+        if (optionalItem.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found");
+        }
+
+        Optional<User> currentUser = userService.getCurrentUser();
+        if (currentUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+        }
+
+        Item item = optionalItem.get();
+        User user = currentUser.get();
+
+        // Check if item is already reserved
+        if (item.getStatus() == ItemStatus.RESERVED) {
+            // Check if reservation has expired (1 hour)
+            if (item.getReservationDate() != null &&
+                    item.getReservationDate().plusHours(1).isAfter(LocalDateTime.now())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Item is already reserved");
+            }
+        }
+
+        // Reserve the item
+        item.setStatus(ItemStatus.RESERVED);
+        item.setReservationDate(LocalDateTime.now());
+        item.setReservedBy(user);
+        itemService.saveItem(item);
+
+        return ResponseEntity.ok(ItemMapper.toDTO(item));
+    }
+
+    @DeleteMapping("/{itemId}/reserve")
+    @Operation(summary = "Cancel reservation", description = "Cancels the reservation of an item")
+    public ResponseEntity<?> cancelReservation(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @PathVariable Long itemId) {
+
+        if (!validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        Optional<Item> optionalItem = itemService.getItemById(itemId);
+        if (optionalItem.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found");
+        }
+
+        Optional<User> currentUser = userService.getCurrentUser();
+        if (currentUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+        }
+
+        Item item = optionalItem.get();
+        User user = currentUser.get();
+
+        // Check if user is the one who reserved the item
+        if (item.getReservedBy() == null || !item.getReservedBy().getId().equals(user.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the reserver of this item");
+        }
+
+        // Cancel the reservation
+        item.setStatus(ItemStatus.ACTIVE);
+        item.setReservationDate(null);
+        item.setReservedBy(null);
+        itemService.saveItem(item);
+
+        return ResponseEntity.ok(ItemMapper.toDTO(item));
     }
 }

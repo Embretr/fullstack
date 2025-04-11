@@ -16,4 +16,5 @@ export const ItemResponseDTOStatus = {
   ACTIVE: 'ACTIVE',
   ARCHIVED: 'ARCHIVED',
   SOLD: 'SOLD',
+  RESERVED: 'RESERVED',
 } as const;

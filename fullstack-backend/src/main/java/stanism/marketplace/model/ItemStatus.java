@@ -11,5 +11,8 @@ public enum ItemStatus {
     ARCHIVED,
 
     /** The item has been sold. */
-    SOLD
-} 
+    SOLD,
+
+    /** The item has been temporarily reserved. */
+    RESERVED
+}

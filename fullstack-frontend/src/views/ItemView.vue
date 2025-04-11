@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { useGetItemById, useIsItemFavorited, useAddToFavorites, useRemoveFromFavorites } from '../api/item-management/item-management';
-import { computed, onMounted, ref } from 'vue';
+import { useGetItemById, useIsItemFavorited, useAddToFavorites, useRemoveFromFavorites, useReserveItem, useCancelReservation } from '../api/item-management/item-management';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import type { ItemResponseDTO } from '../api/model/itemResponseDTO';
 import { useAuthStore } from '@/stores/auth';
 import { RouterLink } from 'vue-router';
@@ -9,7 +9,7 @@ import Button from '@/components/common/Button.vue';
 
 const route = useRoute();
 const itemId = computed(() => route.params.id as string);
-const { data: itemData } = useGetItemById(Number(itemId.value));
+const { data: itemData, refetch: refetchItem } = useGetItemById(Number(itemId.value));
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 
@@ -52,6 +52,30 @@ const { mutate: removeFromFavorites } = useRemoveFromFavorites({
   }
 });
 
+const { mutate: reserveItem } = useReserveItem({
+  mutation: {
+    onSuccess: () => {
+      console.log('Reservation successful');
+      refetchItem();
+    },
+    onError: (error) => {
+      console.error('Reservation failed:', error);
+    }
+  }
+});
+
+const { mutate: cancelReservation } = useCancelReservation({
+  mutation: {
+    onSuccess: () => {
+      console.log('Cancellation successful');
+      refetchItem();
+    },
+    onError: (error) => {
+      console.error('Cancellation failed:', error);
+    }
+  }
+});
+
 const toggleFavorite = () => {
   if (!isAuthenticated.value) return;
   
@@ -62,10 +86,99 @@ const toggleFavorite = () => {
   }
 };
 
+const handleReservation = () => {
+  if (!isAuthenticated.value) {
+    console.log('User not authenticated');
+    return;
+  }
+  
+  console.log('Current item status:', typedItemData.value?.status);
+  console.log('Current user ID:', authStore.user?.id);
+  console.log('Reserved by ID:', typedItemData.value?.reservedBy?.id);
+  
+  if (typedItemData.value?.status === 'RESERVED' && typedItemData.value?.reservedBy?.id === authStore.user?.id) {
+    console.log('Cancelling reservation');
+    cancelReservation({ itemId: Number(itemId.value) });
+  } else {
+    console.log('Reserving item');
+    reserveItem({ itemId: Number(itemId.value) });
+  }
+};
+
+const isReserved = computed(() => typedItemData.value?.status === 'RESERVED');
+const isReservedByCurrentUser = computed(() => 
+  isReserved.value && 
+  typedItemData.value?.reservedBy?.id === authStore.user?.id
+);
+
+// Add a force update ref
+const forceUpdate = ref(0);
+
+const reservationTimeLeft = computed(() => {
+  // Add forceUpdate to dependencies
+  forceUpdate.value;
+  
+  if (!isReserved.value || !typedItemData.value?.reservationDate) return null;
+  
+  const reservationDate = new Date(typedItemData.value.reservationDate);
+  const expirationDate = new Date(reservationDate.getTime() + 60 * 60 * 1000); // 1 hour
+  const now = new Date();
+  
+  if (now >= expirationDate) {
+    // If reservation has expired, refetch the item to update its status
+    refetchItem();
+    return null;
+  }
+  
+  const diff = expirationDate.getTime() - now.getTime();
+  const minutes = Math.floor(diff / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+});
+
+// Add a timer to update the countdown every second
+let timer: number | null = null;
+
+const startTimer = () => {
+  if (timer !== null) {
+    clearInterval(timer);
+  }
+  timer = window.setInterval(() => {
+    // Force a re-computation by updating the forceUpdate ref
+    forceUpdate.value++;
+  }, 1000);
+};
+
+const stopTimer = () => {
+  if (timer !== null) {
+    clearInterval(timer);
+    timer = null;
+  }
+};
+
+// Watch for changes in reservation status
+watch(isReserved, (newValue) => {
+  if (newValue) {
+    startTimer();
+  } else {
+    stopTimer();
+  }
+});
+
 onMounted(() => {
   if (isAuthenticated.value) {
     refetchFavoriteStatus();
   }
+  
+  // Start the timer if the item is reserved
+  if (isReserved.value) {
+    startTimer();
+  }
+});
+
+onUnmounted(() => {
+  stopTimer();
 });
 </script>
 
@@ -106,14 +219,20 @@ onMounted(() => {
       <!-- Item Details -->
       <div class="item-details">
         <h1>{{ typedItemData.title }}</h1>
-        <p class="price">${{ typedItemData.price }}</p>
+        <p class="price">{{ typedItemData.price }} kr</p>
         <div class="description">
-          <h3>Description</h3>
+          <h3>{{ $t('itemView.description') }}</h3>
           <p>{{ typedItemData.fullDescription }}</p>
         </div>
         <div class="seller-info">
-          <h3>Seller Information</h3>
-          <p>Posted by: {{ typedItemData.owner?.username || 'Anonymous' }}</p>
+          <h3>{{ $t('itemView.sellerInfo') }}</h3>
+          <p>{{ $t('itemView.postedBy', { username: typedItemData.owner?.username || $t('itemView.anonymous') }) }}</p>
+        </div>
+        <div class="reservation-info" v-if="isReserved">
+          <p class="reservation-status">
+            {{ isReservedByCurrentUser ? $t('itemView.reservedByYou') : $t('itemView.reservedByOther') }}
+            <span v-if="reservationTimeLeft">{{ $t('itemView.timeRemaining', { time: reservationTimeLeft }) }}</span>
+          </p>
         </div>
         <div class="action-buttons">
           <Button 
@@ -122,7 +241,23 @@ onMounted(() => {
             :variant="isFavorited ? 'secondary' : 'primary'"
             size="large"
           >
-            {{ isFavorited ? 'Remove from Favorites' : 'Add to Favorites' }}
+            {{ isFavorited ? $t('itemView.removeFromFavorites') : $t('itemView.addToFavorites') }}
+          </Button>
+          <Button 
+            v-if="isAuthenticated && !isReserved" 
+            @click="handleReservation" 
+            variant="primary"
+            size="large"
+          >
+            {{ $t('itemView.reserveItem') }}
+          </Button>
+          <Button 
+            v-if="isReservedByCurrentUser" 
+            @click="handleReservation" 
+            variant="secondary"
+            size="large"
+          >
+            {{ $t('itemView.cancelReservation') }}
           </Button>
           <RouterLink 
             v-if="isAuthenticated && typedItemData.owner" 
@@ -130,15 +265,12 @@ onMounted(() => {
               name: 'Chat', 
               params: { 
                 itemId: itemId, 
-                receiverId: typedItemData.owner.id,
-                sellerId: typedItemData.owner.id,
-                itemPrice: typedItemData.price,
-                itemTitle: typedItemData.title
+                receiverId: authStore.user?.id
               } 
             }"
           >
             <Button variant="primary" size="large">
-              Chat with Seller
+              {{ $t('itemView.chatWithSeller') }}
             </Button>
           </RouterLink>
         </div>
@@ -146,7 +278,7 @@ onMounted(() => {
     </div>
   </div>
   <div v-else class="loading">
-    Loading item details...
+    {{ $t('itemView.loading') }}
   </div>
 </template>
 
@@ -281,6 +413,19 @@ h3 {
   padding: 2rem;
   font-size: 1.2rem;
   color: var(--text-secondary);
+}
+
+.reservation-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--background-secondary);
+  border-radius: var(--border-radius);
+}
+
+.reservation-status {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 .action-buttons {

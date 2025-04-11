@@ -163,7 +163,14 @@ public class UserService {
    * @return An Optional containing the user if found
    */
   public Optional<User> getUserById(Long id) {
-    return userRepository.findById(id);
+    LOGGER.info("Looking up user by ID: {}", id);
+    Optional<User> user = userRepository.findById(id);
+    if (user.isPresent()) {
+      LOGGER.info("Found user with ID {}: {}", id, user.get().getEmail());
+    } else {
+      LOGGER.warn("No user found with ID: {}", id);
+    }
+    return user;
   }
 
   /**
@@ -174,6 +181,13 @@ public class UserService {
    * @return An Optional containing the user if found
    */
   public Optional<User> getUserByEmail(String email) {
-    return userRepository.findByEmail(email);
+    LOGGER.info("Looking up user by email: {}", email);
+    Optional<User> user = userRepository.findByEmail(email);
+    if (user.isPresent()) {
+      LOGGER.info("Found user with email {}: {}", email, user.get().getId());
+    } else {
+      LOGGER.warn("No user found with email: {}", email);
+    }
+    return user;
   }
 }

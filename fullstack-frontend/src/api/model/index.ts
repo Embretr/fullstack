@@ -7,6 +7,7 @@
 
 export * from './addCategoriesToItem200';
 export * from './addToFavorites200';
+export * from './cancelReservation200';
 export * from './category';
 export * from './categoryResponseDTO';
 export * from './createItem200';
@@ -35,6 +36,7 @@ export * from './refundPayment200';
 export * from './refundPaymentParams';
 export * from './removeAdminRole200';
 export * from './removeFromFavorites200';
+export * from './reserveItem200';
 export * from './updateEmail200';
 export * from './updateEmailRequest';
 export * from './updatePassword200';

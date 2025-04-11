@@ -21,6 +21,7 @@ public class ItemMapper {
         dto.setLongitude(item.getLongitude());
         dto.setPublishDate(item.getPublishDate());
         dto.setStatus(item.getStatus());
+        dto.setReservationDate(item.getReservationDate());
 
         // Convert user to UserResponse
         UserResponse userResponse = new UserResponse();
@@ -29,6 +30,16 @@ public class ItemMapper {
         userResponse.setEmail(item.getUser().getEmail());
         userResponse.setRole(item.getUser().getRole());
         dto.setOwner(userResponse);
+
+        // Convert reservedBy to UserResponse if exists
+        if (item.getReservedBy() != null) {
+            UserResponse reservedByResponse = new UserResponse();
+            reservedByResponse.setId(item.getReservedBy().getId());
+            reservedByResponse.setUsername(item.getReservedBy().getUsername());
+            reservedByResponse.setEmail(item.getReservedBy().getEmail());
+            reservedByResponse.setRole(item.getReservedBy().getRole());
+            dto.setReservedBy(reservedByResponse);
+        }
 
         // Convert category to CategoryResponseDTO
         CategoryResponseDTO categoryDTO = new CategoryResponseDTO();
@@ -45,4 +56,4 @@ public class ItemMapper {
 
         return dto;
     }
-} 
+}

@@ -118,5 +118,24 @@
         "processing": "Behandler...",
         "refundPayment": "Refunder betaling",
         "paymentFor": "Betaling for {itemName}"
+    },
+    "payment": {
+        "payWithVipps": "Betal med Vipps",
+        "processing": "Behandler..."
+    },
+    "itemView": {
+        "loading": "Laster varedetaljer...",
+        "description": "Beskrivelse",
+        "sellerInfo": "Selgerinformasjon",
+        "postedBy": "Lagt ut av: {username}",
+        "anonymous": "Anonym",
+        "reservedByYou": "Du har reservert denne varen",
+        "reservedByOther": "Denne varen er reservert",
+        "timeRemaining": "{time} gjenstår",
+        "addToFavorites": "Legg til i favoritter",
+        "removeFromFavorites": "Fjern fra favoritter",
+        "reserveItem": "Reserver vare",
+        "cancelReservation": "Avbryt reservasjon",
+        "chatWithSeller": "Chat med selger"
     }
 }

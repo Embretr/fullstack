@@ -55,7 +55,7 @@ import { useI18n } from 'vue-i18n'
 import type { Message } from '@/types/message'
 import VippsPayment from '@/components/VippsPayment.vue'
 import { useRefundPayment } from '@/api/vipps-controller/vipps-controller'
-import { useGetConversation } from '@/api/message-controller/message-controller'
+import { useGetConversation } from '@/api/messages/messages'
 
 const { t } = useI18n()
 const route = useRoute()
