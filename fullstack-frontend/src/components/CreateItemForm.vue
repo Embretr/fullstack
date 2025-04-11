@@ -19,13 +19,19 @@ const handleFileChange = (event: Event) => {
 };
 
 const validatePriceInput = () => {
+  // Convert to string for manipulation
+  let priceStr = itemPrice.value.toString();
+  
   // Remove any non-numeric characters except for the decimal point
-  itemPrice.value = itemPrice.value.toString().replace(/[^0-9.]/g, '');
+  priceStr = priceStr.replace(/[^0-9.]/g, '');
 
   // Ensure only one decimal point is allowed
-  if ((itemPrice.value.match(/\./g) || []).length > 1) {
-    itemPrice.value = itemPrice.value.slice(0, -1);
+  if ((priceStr.match(/\./g) || []).length > 1) {
+    priceStr = priceStr.slice(0, -1);
   }
+
+  // Convert back to number
+  itemPrice.value = Number.parseFloat(priceStr) || 0;
 };
 
 const { mutate: createItemMutation } = useCreateItem({

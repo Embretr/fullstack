@@ -111,5 +111,13 @@
     "messagesView": {
         "title": "Messages",
         "emptyState": "You don't have any messages yet."
+    },
+    "chatView": {
+        "title": "Chat about {itemName}",
+        "typeMessage": "Type your message...",
+        "send": "Send",
+        "processing": "Processing...",
+        "refundPayment": "Refund Payment",
+        "paymentFor": "Payment for {itemName}"
     }
 }

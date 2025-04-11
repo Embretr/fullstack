@@ -15,7 +15,7 @@
       <img :src="getItemImageUrl(item)" :alt="item.title || 'Item Image'" />
       <h3>{{ item.title }}</h3>
       <p>{{ item.briefDescription || 'No description available' }}</p>
-      <p>${{ item.price }}</p>
+      <p>{{ item.price }} kr</p>
     </div>
   </div>
 </template>

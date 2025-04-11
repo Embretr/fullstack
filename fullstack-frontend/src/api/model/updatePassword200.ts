@@ -5,7 +5,4 @@
  * OpenAPI spec version: v0
  */
 
-export interface UpdatePasswordRequest {
-  currentPassword?: string;
-  newPassword?: string;
-}
+export type UpdatePassword200 = { [key: string]: unknown };

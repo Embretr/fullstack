@@ -8,7 +8,7 @@
       <div v-for="item in favorites" :key="item.id" class="favorite-card">
         <img v-if="item.imageUrls && item.imageUrls.length > 0" :src="item.imageUrls[0]" :alt="item.title" class="item-image">
         <h2>{{ item.title }}</h2>
-        <p class="price">${{ item.price }}</p>
+        <p class="price">{{ item.price }} kr</p>
         <p class="description">{{ item.briefDescription }}</p>
         <button @click="removeFromFavorites(item.id)" class="remove-button">
           {{ $t('favoritesView.remove') }}

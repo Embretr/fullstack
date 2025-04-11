@@ -97,15 +97,23 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async initialize() {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        try {
-          const response = await getMe(); // Fetch user data
-          this.user = response.data;
-        } catch (error) {
-          console.error('Failed to initialize auth state:', error);
-          this.logout(); // Clear invalid token
+      try {
+        const response = await getMe();
+        const userData = response.data;
+        if (!userData.id || !userData.username || !userData.email) {
+          throw new Error('Invalid user data received');
         }
+        this.user = {
+          id: userData.id,
+          username: userData.username,
+          email: userData.email,
+          fullName: null,
+          roles: [userData.role || 'USER']
+        };
+      } catch (error) {
+        console.error('Failed to initialize auth state:', error);
+        this.user = null;
+        this.error = null;
       }
     }
   }

@@ -48,7 +48,6 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
-
     @GetMapping("/{email}")
     @Operation(summary = "Get user by email",
             description = "Retrieves the user details for the specified email.",

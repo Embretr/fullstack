@@ -35,10 +35,13 @@ import type {
 } from 'vue';
 
 import type {
+  GetCurrentUserProfile200,
+  UpdateEmail200,
   UpdateEmailRequest,
+  UpdatePassword200,
   UpdatePasswordRequest,
-  UpdateUsernameRequest,
-  UserResponse
+  UpdateUsername200,
+  UpdateUsernameRequest
 } from '.././model';
 
 
@@ -51,7 +54,7 @@ import type {
  */
 export const updateUsername = (
     updateUsernameRequest: MaybeRef<UpdateUsernameRequest>, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<string>> => {
+ ): Promise<AxiosResponse<UpdateUsername200>> => {
     updateUsernameRequest = unref(updateUsernameRequest);
     
     return axios.default.put(
@@ -62,7 +65,7 @@ export const updateUsername = (
 
 
 
-export const getUpdateUsernameMutationOptions = <TError = AxiosError<string>,
+export const getUpdateUsernameMutationOptions = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUsername>>, TError,{data: UpdateUsernameRequest}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateUsername>>, TError,{data: UpdateUsernameRequest}, TContext> => {
     
@@ -89,12 +92,12 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type UpdateUsernameMutationResult = NonNullable<Awaited<ReturnType<typeof updateUsername>>>
     export type UpdateUsernameMutationBody = UpdateUsernameRequest
-    export type UpdateUsernameMutationError = AxiosError<string>
+    export type UpdateUsernameMutationError = AxiosError<unknown>
 
     /**
  * @summary Update username
  */
-export const useUpdateUsername = <TError = AxiosError<string>,
+export const useUpdateUsername = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUsername>>, TError,{data: UpdateUsernameRequest}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationReturnType<
         Awaited<ReturnType<typeof updateUsername>>,
@@ -113,7 +116,7 @@ export const useUpdateUsername = <TError = AxiosError<string>,
  */
 export const updatePassword = (
     updatePasswordRequest: MaybeRef<UpdatePasswordRequest>, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<string>> => {
+ ): Promise<AxiosResponse<UpdatePassword200>> => {
     updatePasswordRequest = unref(updatePasswordRequest);
     
     return axios.default.put(
@@ -124,7 +127,7 @@ export const updatePassword = (
 
 
 
-export const getUpdatePasswordMutationOptions = <TError = AxiosError<string>,
+export const getUpdatePasswordMutationOptions = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePassword>>, TError,{data: UpdatePasswordRequest}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof updatePassword>>, TError,{data: UpdatePasswordRequest}, TContext> => {
     
@@ -151,12 +154,12 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type UpdatePasswordMutationResult = NonNullable<Awaited<ReturnType<typeof updatePassword>>>
     export type UpdatePasswordMutationBody = UpdatePasswordRequest
-    export type UpdatePasswordMutationError = AxiosError<string>
+    export type UpdatePasswordMutationError = AxiosError<unknown>
 
     /**
  * @summary Update password
  */
-export const useUpdatePassword = <TError = AxiosError<string>,
+export const useUpdatePassword = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePassword>>, TError,{data: UpdatePasswordRequest}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationReturnType<
         Awaited<ReturnType<typeof updatePassword>>,
@@ -237,7 +240,7 @@ export function useGetUserEmail<TData = Awaited<ReturnType<typeof getUserEmail>>
  */
 export const updateEmail = (
     updateEmailRequest: MaybeRef<UpdateEmailRequest>, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<string>> => {
+ ): Promise<AxiosResponse<UpdateEmail200>> => {
     updateEmailRequest = unref(updateEmailRequest);
     
     return axios.default.put(
@@ -248,7 +251,7 @@ export const updateEmail = (
 
 
 
-export const getUpdateEmailMutationOptions = <TError = AxiosError<string>,
+export const getUpdateEmailMutationOptions = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmail>>, TError,{data: UpdateEmailRequest}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateEmail>>, TError,{data: UpdateEmailRequest}, TContext> => {
     
@@ -275,12 +278,12 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type UpdateEmailMutationResult = NonNullable<Awaited<ReturnType<typeof updateEmail>>>
     export type UpdateEmailMutationBody = UpdateEmailRequest
-    export type UpdateEmailMutationError = AxiosError<string>
+    export type UpdateEmailMutationError = AxiosError<unknown>
 
     /**
  * @summary Update email
  */
-export const useUpdateEmail = <TError = AxiosError<string>,
+export const useUpdateEmail = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEmail>>, TError,{data: UpdateEmailRequest}, TContext>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient): UseMutationReturnType<
         Awaited<ReturnType<typeof updateEmail>>,
@@ -361,7 +364,7 @@ export function useGetUserName<TData = Awaited<ReturnType<typeof getUserName>>, 
  */
 export const getCurrentUserProfile = (
      options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserResponse>> => {
+ ): Promise<AxiosResponse<GetCurrentUserProfile200>> => {
     
     
     return axios.default.get(
@@ -375,7 +378,7 @@ export const getGetCurrentUserProfileQueryKey = () => {
     }
 
     
-export const getGetCurrentUserProfileQueryOptions = <TData = Awaited<ReturnType<typeof getCurrentUserProfile>>, TError = AxiosError<string>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUserProfile>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetCurrentUserProfileQueryOptions = <TData = Awaited<ReturnType<typeof getCurrentUserProfile>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUserProfile>>, TError, TData>>, axios?: AxiosRequestConfig}
 ) => {
 
 const {query: queryOptions, axios: axiosOptions} = options ?? {};
@@ -394,14 +397,14 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetCurrentUserProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUserProfile>>>
-export type GetCurrentUserProfileQueryError = AxiosError<string>
+export type GetCurrentUserProfileQueryError = AxiosError<unknown>
 
 
 /**
  * @summary Get current user profile
  */
 
-export function useGetCurrentUserProfile<TData = Awaited<ReturnType<typeof getCurrentUserProfile>>, TError = AxiosError<string>>(
+export function useGetCurrentUserProfile<TData = Awaited<ReturnType<typeof getCurrentUserProfile>>, TError = AxiosError<unknown>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCurrentUserProfile>>, TError, TData>>, axios?: AxiosRequestConfig}
  , queryClient?: QueryClient 
  ): UseQueryReturnType<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

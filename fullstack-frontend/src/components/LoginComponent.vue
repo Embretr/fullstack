@@ -20,7 +20,9 @@
           :placeholder="$t('loginForm.passwordPlaceholder')"
         />
       </div>
-      <button type="submit" class="submit-btn">{{ $t('loginForm.loginButton') }}</button>
+      <Button type="submit" variant="primary" size="large" class="submit-btn">
+        {{ $t('loginForm.loginButton') }}
+      </Button>
     </form>
   </template>
 
@@ -29,6 +31,7 @@
   import { useAuthStore } from '@/stores/auth';
   import { useI18n } from 'vue-i18n';
   import { useRouter } from 'vue-router';
+  import Button from './common/Button.vue';
 
   const { t } = useI18n();
   const router = useRouter();
@@ -81,16 +84,6 @@
   }
 
   .submit-btn {
-    padding: 0.5rem 1rem;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  .submit-btn:hover {
-    background-color: #0056b3;
+    width: 100%;
   }
   </style>

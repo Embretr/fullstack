@@ -10,7 +10,11 @@
         "logout": "Logg ut",
         "login": "Logg inn",
         "register": "Registrer",
-        "language": "Språk"
+        "language": "Språk",
+        "menu": "Meny",
+        "adminPanel": "Admin Panel",
+        "settings": "Innstillinger",
+        "listItem": "Legg ut Annonse"
     },
     "logout": {
         "success": "Du har blitt logget ut.",
@@ -74,7 +78,12 @@
         "confirmNewPasswordPlaceholder": "Bekreft det nye passordet",
         "saveButton": "Lagre endringer",
         "successMessage": "Innstillinger oppdatert!",
-        "errorDefault": "En feil oppstod under oppdatering av innstillingene. Vennligst prøv igjen."
+        "errorDefault": "En feil oppstod under oppdatering av innstillingene. Vennligst prøv igjen.",
+        "currentPasswordPlaceholder": "Skriv inn ditt nåværende passord",
+        "currentPasswordLabel": "Nåværende passord",
+        "languageLabel": "Språk",
+        "languageEnglish": "Engelsk",
+        "languageNorwegian": "Norsk"
     },
     "homeView": {
         "welcomeTitle": "Velkommen til Markedsplass"
@@ -95,10 +104,19 @@
     },
     "favoritesView": {
         "title": "Dine favoritter",
-        "emptyState": "Du har ikke lagt til noen gjenstander i favoritter ennå."
+        "emptyState": "Du har ikke lagt til noen gjenstander i favoritter ennå.",
+        "remove": "Fjern fra Favoritter"
     },
     "messagesView": {
         "title": "Meldinger",
         "emptyState": "Du har ingen meldinger ennå."
+    },
+    "chatView": {
+        "title": "Chat om {itemName}",
+        "typeMessage": "Skriv meldingen din...",
+        "send": "Send",
+        "processing": "Behandler...",
+        "refundPayment": "Refunder betaling",
+        "paymentFor": "Betaling for {itemName}"
     }
 }

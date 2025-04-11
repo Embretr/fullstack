@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -77,5 +78,25 @@ const router = createRouter({
   routes
 })
 
+// Navigation guard
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  
+  // If the route requires authentication
+  if (to.meta.requiresAuth) {
+    // Check if user is authenticated
+    if (!authStore.isAuthenticated) {
+      // Try to initialize auth state
+      await authStore.initialize()
+      
+      // If still not authenticated, redirect to login
+      if (!authStore.isAuthenticated) {
+        return next({ name: 'Login', query: { redirect: to.fullPath } })
+      }
+    }
+  }
+  
+  next()
+})
 
 export default router

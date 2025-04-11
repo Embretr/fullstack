@@ -2,13 +2,13 @@
   <div class="chat-page">
     <div class="chat-container">
       <div class="chat-header">
-        <h2>Chat about Item #{{ itemId }}</h2>
+        <h2>{{ $t('chatView.title', { itemName: itemTitle }) }}</h2>
         <div class="payment-actions" v-if="currentUser">
           <VippsPayment
             v-if="isBuyer"
             :orderId="orderId"
             :amount="itemPrice"
-            :description="itemDescription"
+            :description="$t('chatView.paymentFor', { itemName: itemTitle })"
             @paymentInitiated="handlePaymentInitiated"
             @paymentError="handlePaymentError"
           />
@@ -17,7 +17,7 @@
             @click="handleRefund" 
             class="refund-button"
             :disabled="isRefunding">
-            {{ isRefunding ? 'Processing...' : 'Refund Payment' }}
+            {{ isRefunding ? $t('chatView.processing') : $t('chatView.refundPayment') }}
           </button>
         </div>
       </div>
@@ -34,10 +34,10 @@
       <div class="chat-input">
         <input v-model="newMessage" 
                @keyup.enter="sendMessage" 
-               placeholder="Type your message..."
+               :placeholder="$t('chatView.typeMessage')"
                :disabled="!isConnected">
         <button @click="sendMessage" :disabled="!isConnected || !newMessage.trim()">
-          Send
+          {{ $t('chatView.send') }}
         </button>
       </div>
     </div>
@@ -51,11 +51,13 @@ import SockJS from 'sockjs-client'
 import type { IMessage } from '@stomp/stompjs'
 import { Client } from '@stomp/stompjs'
 import { useRoute } from 'vue-router'
-import { useGetConversation } from '@/api/message-controller/message-controller'
-import type { Message } from '@/api/model/message'
+import { useI18n } from 'vue-i18n'
+import type { Message } from '@/types/message'
 import VippsPayment from '@/components/VippsPayment.vue'
 import { useRefundPayment } from '@/api/vipps-controller/vipps-controller'
+import { useGetConversation } from '@/api/message-controller/message-controller'
 
+const { t } = useI18n()
 const route = useRoute()
 const authStore = useAuthStore()
 const currentUser = authStore.user
@@ -87,7 +89,6 @@ const isBuyer = computed(() => {
 })
 const isSeller = computed(() => currentUser?.id === sellerId)
 const orderId = computed(() => `item-${itemId}-${Date.now()}`)
-const itemDescription = computed(() => `Payment for ${itemTitle}`)
 
 const { mutate: refundPayment } = useRefundPayment()
 

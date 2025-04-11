@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import { useGetItemById, useIsItemFavorited, useAddToFavorites, useRemoveFromFavorites } from '../api/item-management/item-management';
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import type { ItemResponseDTO } from '../api/model/itemResponseDTO';
 import { useAuthStore } from '@/stores/auth';
 import { RouterLink } from 'vue-router';
+import Button from '@/components/common/Button.vue';
 
 const route = useRoute();
 const itemId = computed(() => route.params.id as string);
@@ -14,6 +15,21 @@ const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 // Type assertion for the item data
 const typedItemData = computed(() => itemData.value?.data as ItemResponseDTO | undefined);
+
+// Carousel state
+const currentImageIndex = ref(0);
+
+const nextImage = () => {
+  if (typedItemData.value?.imageUrls) {
+    currentImageIndex.value = (currentImageIndex.value + 1) % typedItemData.value.imageUrls.length;
+  }
+};
+
+const prevImage = () => {
+  if (typedItemData.value?.imageUrls) {
+    currentImageIndex.value = (currentImageIndex.value - 1 + typedItemData.value.imageUrls.length) % typedItemData.value.imageUrls.length;
+  }
+};
 
 // Use the generated API client for favorite status
 const { data: favoriteData, refetch: refetchFavoriteStatus } = useIsItemFavorited(Number(itemId.value));
@@ -58,13 +74,33 @@ onMounted(() => {
     <div class="item-container">
       <!-- Image Gallery -->
       <div class="image-gallery">
-        <img 
-          v-for="image in typedItemData.imageUrls" 
-          :key="image" 
-          :src="image" 
-          :alt="typedItemData.title"
-          class="gallery-image"
-        />
+        <div class="carousel-container">
+          <button class="carousel-button prev" @click="prevImage" :disabled="!typedItemData.imageUrls || typedItemData.imageUrls.length <= 1">
+            &lt;
+          </button>
+          <div class="carousel">
+            <transition name="fade" mode="out-in">
+              <img 
+                :key="currentImageIndex"
+                :src="typedItemData?.imageUrls?.[currentImageIndex]" 
+                :alt="typedItemData?.title"
+                class="gallery-image"
+              />
+            </transition>
+          </div>
+          <button class="carousel-button next" @click="nextImage" :disabled="!typedItemData.imageUrls || typedItemData.imageUrls.length <= 1">
+            &gt;
+          </button>
+          <div class="carousel-indicators" v-if="typedItemData.imageUrls && typedItemData.imageUrls.length > 1">
+            <button
+              v-for="(_, index) in typedItemData.imageUrls"
+              :key="index"
+              class="indicator"
+              :class="{ active: currentImageIndex === index }"
+              @click="currentImageIndex = index"
+            />
+          </div>
+        </div>
       </div>
 
       <!-- Item Details -->
@@ -80,13 +116,14 @@ onMounted(() => {
           <p>Posted by: {{ typedItemData.owner?.username || 'Anonymous' }}</p>
         </div>
         <div class="action-buttons">
-          <button 
+          <Button 
             v-if="isAuthenticated" 
             @click="toggleFavorite" 
-            :class="['favorite-button', { 'is-favorite': isFavorited }]"
+            :variant="isFavorited ? 'secondary' : 'primary'"
+            size="large"
           >
             {{ isFavorited ? 'Remove from Favorites' : 'Add to Favorites' }}
-          </button>
+          </Button>
           <RouterLink 
             v-if="isAuthenticated && typedItemData.owner" 
             :to="{ 
@@ -99,9 +136,10 @@ onMounted(() => {
                 itemTitle: typedItemData.title
               } 
             }"
-            class="chat-button"
           >
-            Chat with Seller
+            <Button variant="primary" size="large">
+              Chat with Seller
+            </Button>
           </RouterLink>
         </div>
       </div>
@@ -126,16 +164,96 @@ onMounted(() => {
 }
 
 .image-gallery {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  position: relative;
+}
+
+.carousel-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .gallery-image {
   width: 100%;
-  height: auto;
-  border-radius: var(--border-radius);
+  height: 100%;
   object-fit: cover;
+  border-radius: var(--border-radius);
+}
+
+.carousel-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: background-color 0.2s;
+}
+
+.carousel-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.carousel-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.carousel-button.prev {
+  left: 10px;
+}
+
+.carousel-button.next {
+  right: 10px;
+}
+
+.carousel-indicators {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.indicator.active {
+  background-color: white;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 .item-details {
@@ -165,55 +283,16 @@ h3 {
   color: var(--text-secondary);
 }
 
-.favorite-button {
-  margin-top: 2rem;
-  padding: 0.75rem 1.5rem;
-  background-color: var(--secondary-color);
-  color: white;
-  border: none;
-  border-radius: var(--border-radius);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.favorite-button:hover {
-  background-color: var(--secondary-color-hover);
-}
-
-.favorite-button.is-favorite {
-  background-color: #ff4444;
-}
-
-.favorite-button.is-favorite:hover {
-  background-color: #cc0000;
-}
-
-.chat-button {
-  margin-top: 2rem;
-  padding: 0.75rem 1.5rem;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: var(--border-radius);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.chat-button:hover {
-  background-color: var(--primary-color-hover);
-}
-
 .action-buttons {
   margin-top: 2rem;
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.favorite-button,
+.chat-button {
+  display: none;
 }
 
 @media (max-width: 768px) {
