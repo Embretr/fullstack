@@ -9,7 +9,7 @@ import { useMakeUserAdmin } from '../api/user-management/user-management';
 import { useRemoveAdminRole } from '../api/user-management/user-management';
 import { useDeleteUserByEmail } from '../api/user-management/user-management';
 import { useGetAllUsers } from '../api/user-management/user-management'; // Add API for fetching all users
-import type {  Category } from '../api/model';
+import type {  Category, User } from '../api/model';
 import type { AxiosError } from 'axios';
 
 // Search and filter state
@@ -132,6 +132,10 @@ const deleteUser = async (): Promise<void> => {
 
 // Fetch all users
 const { data: users, isLoading: usersLoading, error: usersError } = useGetAllUsers();
+const usersList = computed<User[]>(() => {
+  if (!users.value?.data) return [];
+  return Array.isArray(users.value.data) ? users.value.data : [users.value.data];
+});
 
 // Toggle users visibility
 const showUsers = ref(false); // Controls whether users are displayed
@@ -341,7 +345,7 @@ const filteredItems = computed(() => {
 
       <p v-if="usersError" class="user-error">{{ usersError.message }}</p>
 
-      <table v-if="showUsers && users?.data?.length" class="users-table">
+      <table v-if="showUsers && usersList.length > 0" class="users-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -351,7 +355,7 @@ const filteredItems = computed(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in users.data" :key="user.id">
+          <tr v-for="user in usersList" :key="user.id">
             <td>{{ user.id }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.username }}</td>
@@ -360,7 +364,7 @@ const filteredItems = computed(() => {
         </tbody>
       </table>
 
-      <p v-else-if="showUsers && !users?.data?.length" class="no-users-message">
+      <p v-else-if="showUsers && usersList.length === 0" class="no-users-message">
         No users found.
       </p>
     </section>

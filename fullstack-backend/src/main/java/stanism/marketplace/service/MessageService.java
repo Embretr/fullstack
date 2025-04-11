@@ -26,8 +26,13 @@ public class MessageService {
 
     @Transactional(readOnly = true)
     public List<Message> getMessagesBetweenUsers(User user1, User user2, Item item) {
-        return messageRepository.findBySenderAndReceiverAndItemOrReceiverAndSenderAndItemOrderByTimestampAsc(
-                user1, user2, item, user1, user2, item);
+        System.out.println("Getting messages between users: " + user1.getId() + " and " + user2.getId() +
+                " for item: " + item.getId());
+        List<Message> messages = messageRepository
+                .findBySenderAndReceiverAndItemOrReceiverAndSenderAndItemOrderByTimestampAsc(
+                        user1, user2, item, user1, user2, item);
+        System.out.println("Retrieved " + messages.size() + " messages from repository");
+        return messages;
     }
 
     @Transactional(readOnly = true)

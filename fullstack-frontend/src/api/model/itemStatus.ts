@@ -13,4 +13,5 @@ export const ItemStatus = {
   ACTIVE: 'ACTIVE',
   ARCHIVED: 'ARCHIVED',
   SOLD: 'SOLD',
+  RESERVED: 'RESERVED',
 } as const;

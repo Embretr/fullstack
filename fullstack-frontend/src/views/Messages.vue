@@ -1,30 +1,45 @@
 <template>
   <div class="messages">
     <h1>{{ $t('messagesView.title') }}</h1>
-    <div v-if="messages.length === 0" class="empty-state">
+    <div v-if="isLoading" class="loading">
+      <p>{{ $t('common.loading') }}</p>
+    </div>
+    <div v-else-if="!messages?.data?.length" class="empty-state">
       <p>{{ $t('messagesView.emptyState') }}</p>
     </div>
     <div v-else class="messages-list">
-      <div v-for="message in messages" :key="message.id" class="message-card">
+      <div v-for="message in messages.data" :key="message.id" class="message-card">
         <div class="message-header">
-          <h3>{{ message.sender }}</h3>
-          <span class="timestamp">{{ message.timestamp }}</span>
+          <h3>{{ message.sender?.username }}</h3>
+          <span class="timestamp">{{ message.timestamp ? formatDate(message.timestamp) : '' }}</span>
         </div>
         <p class="message-content">{{ message.content }}</p>
+        <div v-if="message.item" class="message-item">
+          <p class="item-title">{{ message.item.title }}</p>
+          <p class="item-price">{{ message.item.price ? formatPrice(message.item.price) : '' }}</p>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-interface Message {
-  id: number;
-  sender: string;
-  content: string;
-  timestamp: string;
-}
+import { useGetUserConversations } from '@/api/messages/messages';
+import { useI18n } from 'vue-i18n';
 
-const messages: Message[] = [];
+const { t } = useI18n();
+const { data: messages, isLoading } = useGetUserConversations();
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleString();
+};
+
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(price);
+};
 </script>
 
 <style scoped>
@@ -32,7 +47,7 @@ const messages: Message[] = [];
   padding: 2rem;
 }
 
-.empty-state {
+.loading, .empty-state {
   text-align: center;
   padding: 3rem;
   background: white;
@@ -59,6 +74,22 @@ const messages: Message[] = [];
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.5rem;
+}
+
+.message-item {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.item-title {
+  font-weight: 500;
+  color: var(--secondary-color);
+}
+
+.item-price {
+  color: var(--primary-color);
+  font-weight: 600;
 }
 
 h1 {

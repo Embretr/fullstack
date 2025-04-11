@@ -8,8 +8,8 @@
       <div class="nav-links" :class="{ 'hidden': isMobileMenuOpen }">
         <router-link to="/">{{ $t('navbar.home') }}</router-link>
         <router-link to="/categories">{{ $t('navbar.categories') }}</router-link>
-        <router-link to="/favorites">{{ $t('navbar.favorites') }}</router-link>
-        <router-link to="/messages">{{ $t('navbar.messages') }}</router-link>
+        <router-link v-if="isLoggedIn" to="/favorites">{{ $t('navbar.favorites') }}</router-link>
+        <router-link v-if="isLoggedIn" to="/messages">{{ $t('navbar.messages') }}</router-link>
       </div>
       <div class="nav-right">
         <div class="auth-links">
@@ -30,9 +30,8 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import LoggedInNavBar from './LoggedInNavBar.vue';
 import LoggedOutNavBar from './LoggedOutNavBar.vue';
-import { useI18n } from 'vue-i18n';
 
-const { locale } = useI18n();
+
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isAuthenticated);
 

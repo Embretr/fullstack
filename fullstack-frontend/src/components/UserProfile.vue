@@ -12,10 +12,10 @@
   </div>
   <div v-else class="items-list">
     <div v-for="item in userItems" :key="item.id" class="item">
-      <img :src="getItemImageUrl(item)" :alt="item.title || 'Item Image'" />
+      <img :src="getImageUrl(item.imageUrls?.[0] || '')" :alt="item.title || 'Item Image'" />
       <h3>{{ item.title }}</h3>
       <p>{{ item.briefDescription || 'No description available' }}</p>
-      <p>${{ item.price }}</p>
+      <p>{{ item.price }} kr</p>
     </div>
   </div>
 </template>
@@ -27,6 +27,9 @@ import { useI18n } from 'vue-i18n';
 import { useGetUserItems } from '../api/item-management/item-management';
 import { useGetMe } from '../api/authentication/authentication';
 import type { ItemResponseDTO } from '../api/model/itemResponseDTO';
+import { useAuthStore } from '@/stores/auth';
+import { useGetUserFavorites } from '@/api/item-management/item-management';
+import { getImageUrl } from '@/utils/imageUtils';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -52,13 +55,6 @@ const userItems = computed<ItemResponseDTO[]>(() => {
   if (!itemsData.value?.data) return [];
   return (itemsData.value.data as unknown as ItemResponseDTO[]) || [];
 });
-
-// Helper function to get item image URL
-const getItemImageUrl = (item: ItemResponseDTO): string => {
-  if (!item.imageUrls?.length) return 'default-image-url.jpg';
-  const image = item.imageUrls[0];
-  return image ? `/api/items/images/${image}` : 'default-image-url.jpg';
-};
 
 const logout = async () => {
   try {

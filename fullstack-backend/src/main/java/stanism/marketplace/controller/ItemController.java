@@ -23,6 +23,7 @@ import stanism.marketplace.model.Category;
 import stanism.marketplace.model.Favorite;
 import stanism.marketplace.model.Image;
 import stanism.marketplace.model.Item;
+import stanism.marketplace.model.ItemStatus;
 import stanism.marketplace.model.User;
 import stanism.marketplace.model.dto.CreateItemRequestDTO;
 import stanism.marketplace.model.dto.ItemResponseDTO;
@@ -32,12 +33,16 @@ import stanism.marketplace.service.CategoryService;
 import stanism.marketplace.service.ItemService;
 import stanism.marketplace.service.UserService;
 import stanism.marketplace.service.FavoriteService;
+import stanism.marketplace.service.ImageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,6 +53,7 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:3173")
 @Tag(name = "Item Management", description = "Endpoints for managing marketplace items")
 public class ItemController {
+    private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
 
     /** Service for handling item-related operations. */
     private final ItemService itemService;
@@ -58,6 +64,9 @@ public class ItemController {
     /** Service for handling category-related operations. */
     private final CategoryService categoryService;
 
+    /** Service for handling image-related operations. */
+    private final ImageService imageService;
+
     /** Utility for JWT token operations. */
     private final JwtUtil jwtUtil;
 
@@ -66,12 +75,13 @@ public class ItemController {
 
     public ItemController(ItemService itemService, UserService userService,
             CategoryService categoryService, JwtUtil jwtUtil,
-            FavoriteService favoriteService) {
+            FavoriteService favoriteService, ImageService imageService) {
         this.itemService = itemService;
         this.userService = userService;
         this.categoryService = categoryService;
         this.jwtUtil = jwtUtil;
         this.favoriteService = favoriteService;
+        this.imageService = imageService;
     }
 
     @GetMapping
@@ -138,22 +148,21 @@ public class ItemController {
     @PostMapping
     @Operation(summary = "Create new item", description = "Creates a new item with associated images")
     public ResponseEntity<?> createItem(
-            @RequestHeader(value = "Authorization", required = false) String token,
             @RequestParam("images") MultipartFile[] imageFiles,
             @RequestParam("itemData") String itemDataJson) {
-        if (!validateToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
+        logger.info("Received create item request with {} images", imageFiles.length);
+        logger.debug("Item data JSON: {}", itemDataJson);
 
-        String email = jwtUtil.extractUsername(token);
         Optional<User> currentUser = userService.getCurrentUser();
-        if (currentUser.isEmpty() || !currentUser.get().getEmail().equals(email)) {
+        if (currentUser.isEmpty()) {
+            logger.warn("Create item request failed: User not logged in");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
         }
 
         try {
             return processItemCreation(imageFiles, itemDataJson, currentUser.get());
         } catch (Exception e) {
+            logger.error("Error creating item: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Error creating item: " + e.getMessage());
         }
@@ -171,14 +180,36 @@ public class ItemController {
             MultipartFile[] imageFiles,
             String itemDataJson,
             User currentUser) throws IOException {
+        logger.info("Processing item creation for user: {}", currentUser.getEmail());
+
         ObjectMapper objectMapper = new ObjectMapper();
         CreateItemRequestDTO itemData = objectMapper.readValue(itemDataJson, CreateItemRequestDTO.class);
+        logger.debug("Parsed item data: {}", itemData);
 
         Optional<Category> category = Optional.ofNullable(
                 categoryService.getCategoryById(itemData.getCategoryId()));
         if (category.isEmpty()) {
+            logger.warn("Category not found for ID: {}", itemData.getCategoryId());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Category not found");
+        }
+
+        // Validate images
+        for (MultipartFile imageFile : imageFiles) {
+            logger.debug("Validating image: {} ({} bytes)",
+                    imageFile.getOriginalFilename(),
+                    imageFile.getSize());
+
+            if (imageFile.isEmpty()) {
+                logger.warn("Empty image file received");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("One or more image files are empty");
+            }
+            if (!imageFile.getContentType().startsWith("image/")) {
+                logger.warn("Invalid file type received: {}", imageFile.getContentType());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("One or more files are not images");
+            }
         }
 
         Item item = new Item.Builder()
@@ -192,28 +223,54 @@ public class ItemController {
                 .category(category.get())
                 .build();
 
+        logger.info("Created item object: {}", item);
+
         // Save the item first to get its ID
         Item createdItem = itemService.saveItem(item);
+        logger.info("Saved item with ID: {}", createdItem.getId());
 
         // Save and associate images with the item
         for (MultipartFile imageFile : imageFiles) {
-            Image image = saveImage(imageFile, createdItem);
-            createdItem.getImages().add(image);
+            try {
+                logger.debug("Saving image: {}", imageFile.getOriginalFilename());
+                Image image = saveImage(imageFile, createdItem);
+                image = imageService.saveImage(image); // Save the image to the database
+                createdItem.getImages().add(image);
+                logger.info("Successfully saved image: {}", image.getImageUrl());
+            } catch (IOException e) {
+                logger.error("Failed to save image: {}", e.getMessage(), e);
+                // If image saving fails, delete the item and return error
+                itemService.deleteItem(createdItem.getId());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Error saving image: " + e.getMessage());
+            }
         }
 
         // Update the item with the images
         createdItem = itemService.saveItem(createdItem);
+        logger.info("Successfully created item with {} images", createdItem.getImages().size());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
     }
 
     private Image saveImage(MultipartFile imageFile, Item item) throws IOException {
-        String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+        logger.debug("Saving image file: {}", imageFile.getOriginalFilename());
+
+        String originalFilename = imageFile.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String fileName = UUID.randomUUID().toString() + extension;
+        logger.debug("Generated filename: {}", fileName);
+
         Path filePath = Paths.get("uploads", fileName);
+        logger.debug("Saving to path: {}", filePath);
+
         Files.createDirectories(filePath.getParent());
         Files.write(filePath, imageFile.getBytes());
+        logger.info("Successfully saved image file to: {}", filePath);
 
         String imageUrl = "/uploads/" + fileName;
-        return new Image(item, imageUrl, imageFile.getOriginalFilename());
+        logger.debug("Created image URL: {}", imageUrl);
+
+        return new Image(item, imageUrl, originalFilename);
     }
 
     @DeleteMapping("/{itemId}")
@@ -319,5 +376,78 @@ public class ItemController {
 
         boolean isFavorited = favoriteService.isItemFavorited(currentUser.get(), optionalItem.get());
         return ResponseEntity.ok(isFavorited);
+    }
+
+    @PostMapping("/{itemId}/reserve")
+    @Operation(summary = "Reserve item", description = "Reserves an item for one hour")
+    public ResponseEntity<?> reserveItem(
+            @PathVariable Long itemId) {
+
+        Optional<Item> optionalItem = itemService.getItemById(itemId);
+        if (optionalItem.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found");
+        }
+
+        Optional<User> currentUser = userService.getCurrentUser();
+        if (currentUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+        }
+
+        Item item = optionalItem.get();
+        User user = currentUser.get();
+
+        // Check if item is already reserved
+        if (item.getStatus() == ItemStatus.RESERVED) {
+            // Check if reservation has expired (1 hour)
+            if (item.getReservationDate() != null &&
+                    item.getReservationDate().plusHours(1).isAfter(LocalDateTime.now())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Item is already reserved");
+            }
+        }
+
+        // Reserve the item
+        item.setStatus(ItemStatus.RESERVED);
+        item.setReservationDate(LocalDateTime.now());
+        item.setReservedBy(user);
+        itemService.saveItem(item);
+
+        return ResponseEntity.ok(ItemMapper.toDTO(item));
+    }
+
+    @DeleteMapping("/{itemId}/reserve")
+    @Operation(summary = "Cancel reservation", description = "Cancels the reservation of an item")
+    public ResponseEntity<?> cancelReservation(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @PathVariable Long itemId) {
+
+        if (!validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        Optional<Item> optionalItem = itemService.getItemById(itemId);
+        if (optionalItem.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item not found");
+        }
+
+        Optional<User> currentUser = userService.getCurrentUser();
+        if (currentUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+        }
+
+        Item item = optionalItem.get();
+        User user = currentUser.get();
+
+        // Check if user is the one who reserved the item
+        if (item.getReservedBy() == null || !item.getReservedBy().getId().equals(user.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the reserver of this item");
+        }
+
+        // Cancel the reservation
+        item.setStatus(ItemStatus.ACTIVE);
+        item.setReservationDate(null);
+        item.setReservedBy(null);
+        itemService.saveItem(item);
+
+        return ResponseEntity.ok(ItemMapper.toDTO(item));
     }
 }

@@ -1,11 +1,16 @@
 <template>
   <nav class="navbar">
-    <router-link class="button" to="/login">{{ $t('navbar.login') }}</router-link>
-    <router-link class="button" to="/register">{{ $t('navbar.register') }}</router-link>
+    <RouterLink to="/login">
+      <Button variant="primary" size="medium">{{ $t('navbar.login') }}</Button>
+    </RouterLink>
+    <RouterLink to="/register">
+      <Button variant="outline" size="medium">{{ $t('navbar.register') }}</Button>
+    </RouterLink>
   </nav>
 </template>
 
 <script setup lang="ts">
+import Button from './common/Button.vue';
 // No script logic needed for translations here, but could import useI18n if required later
 </script>
 
@@ -15,16 +20,5 @@
   gap: 1rem;
 }
 
-.button {
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: white;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-}
 
-.button:hover {
-  background-color: #0056b3;
-}
 </style>

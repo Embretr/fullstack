@@ -30,6 +30,9 @@ export interface ItemResponseDTO {
   publishDate?: string;
   /** Item status */
   status?: ItemResponseDTOStatus;
+  /** Reservation date */
+  reservationDate?: string;
+  reservedBy?: UserResponse;
   owner?: UserResponse;
   category?: CategoryResponseDTO;
   /** Image URLs */

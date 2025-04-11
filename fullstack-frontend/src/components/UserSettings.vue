@@ -77,7 +77,7 @@ const email = ref('');
 const password = ref('');
 const currentPassword = ref('');
 const confirmPassword = ref('');
-const selectedLanguage = ref(locale.value); // Bind the current locale to the dropdown
+const selectedLanguage = ref(localStorage.getItem('language') || locale.value); // Load saved language or use current locale
 
 const { mutate: updateUsername } = useUpdateUsername({
   mutation: {
@@ -159,6 +159,7 @@ const updateSettings = async () => {
 
 const changeLanguage = () => {
   locale.value = selectedLanguage.value; // Update the locale dynamically
+  localStorage.setItem('language', selectedLanguage.value); // Save language preference
 };
 </script>
 

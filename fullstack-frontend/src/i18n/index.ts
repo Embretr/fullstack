@@ -6,6 +6,13 @@ import noMessages from './locales/no.json';
 
 // Function to detect browser language
 const getInitialLocale = (): string => {
+    // Check localStorage first
+    const savedLang = localStorage.getItem('language');
+    if (savedLang) {
+        return savedLang;
+    }
+    
+    // Fallback to browser language
     const browserLang = navigator.language.split('-')[0]; // Get base language (e.g., 'en' from 'en-US')
     const supportedLangs = ['en', 'no'];
     return supportedLangs.includes(browserLang) ? browserLang : 'en'; // Default to 'en'
