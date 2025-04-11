@@ -6,6 +6,7 @@ import type { ItemResponseDTO } from '../api/model/itemResponseDTO';
 import { useAuthStore } from '@/stores/auth';
 import { RouterLink } from 'vue-router';
 import Button from '@/components/common/Button.vue';
+import { getImageUrls } from '@/utils/imageUtils';
 
 const route = useRoute();
 const itemId = computed(() => route.params.id as string);
@@ -14,7 +15,16 @@ const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 // Type assertion for the item data
-const typedItemData = computed(() => itemData.value?.data as ItemResponseDTO | undefined);
+const typedItemData = computed<ItemResponseDTO | undefined>(() => {
+  if (!itemData.value?.data) return undefined;
+  
+  const item = { ...itemData.value.data };
+  // Construct full image URLs
+  if (item.imageUrls && Array.isArray(item.imageUrls)) {
+    item.imageUrls = getImageUrls(item.imageUrls);
+  }
+  return item;
+});
 
 // Carousel state
 const currentImageIndex = ref(0);
@@ -194,11 +204,15 @@ onUnmounted(() => {
           <div class="carousel">
             <transition name="fade" mode="out-in">
               <img 
+                v-if="typedItemData.imageUrls && typedItemData.imageUrls.length > 0"
                 :key="currentImageIndex"
-                :src="typedItemData?.imageUrls?.[currentImageIndex]" 
-                :alt="typedItemData?.title"
+                :src="typedItemData.imageUrls[currentImageIndex]" 
+                :alt="typedItemData.title"
                 class="gallery-image"
               />
+              <div v-else class="no-image">
+                {{ $t('itemView.noImage') }}
+              </div>
             </transition>
           </div>
           <button class="carousel-button next" @click="nextImage" :disabled="!typedItemData.imageUrls || typedItemData.imageUrls.length <= 1">
@@ -438,6 +452,18 @@ h3 {
 .favorite-button,
 .chat-button {
   display: none;
+}
+
+.no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-secondary);
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  border-radius: var(--border-radius);
 }
 
 @media (max-width: 768px) {

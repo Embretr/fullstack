@@ -61,10 +61,8 @@ import type {
 export const getAllItems = (
      options?: AxiosRequestConfig
  ): Promise<AxiosResponse<ItemResponseDTO[]>> => {
-    
-    
     return axios.default.get(
-      `/api/items`,options
+      '/api/items', options
     );
   }
 
@@ -123,12 +121,24 @@ export function useGetAllItems<TData = Awaited<ReturnType<typeof getAllItems>>, 
 export const createItem = (
     params: MaybeRef<CreateItemParams>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<CreateItem200>> => {
-    params = unref(params);
+    const resolvedParams = unref(params);
+    
+    const formData = new FormData();
+    formData.append('itemData', resolvedParams.itemData);
+    for (const image of resolvedParams.images) {
+      formData.append('images', image);
+    }
     
     return axios.default.post(
-      `/api/items`,undefined,{
-    ...options,
-        params: {...unref(params), ...options?.params},}
+      '/api/items',
+      formData,
+      {
+        ...options,
+        headers: {
+          ...options?.headers,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
     );
   }
 
@@ -186,10 +196,11 @@ export const useCreateItem = <TError = AxiosError<unknown>,
 export const reserveItem = (
     itemId: MaybeRef<number>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<ReserveItem200>> => {
-    itemId = unref(itemId);
-    
+    const resolvedItemId = unref(itemId);
     return axios.default.post(
-      `/api/items/${itemId}/reserve`,undefined,options
+      `/api/items/${resolvedItemId}/reserve`,
+      undefined,
+      options
     );
   }
 
@@ -247,10 +258,10 @@ export const useReserveItem = <TError = AxiosError<unknown>,
 export const cancelReservation = (
     itemId: MaybeRef<number>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<CancelReservation200>> => {
-    itemId = unref(itemId);
-    
+    const resolvedItemId = unref(itemId);
     return axios.default.delete(
-      `/api/items/${itemId}/reserve`,options
+      `/api/items/${resolvedItemId}/reserve`,
+      options
     );
   }
 
@@ -308,10 +319,11 @@ export const useCancelReservation = <TError = AxiosError<unknown>,
 export const addToFavorites = (
     itemId: MaybeRef<number>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<AddToFavorites200>> => {
-    itemId = unref(itemId);
-    
+    const resolvedItemId = unref(itemId);
     return axios.default.post(
-      `/api/items/${itemId}/favorite`,undefined,options
+      `/api/items/${resolvedItemId}/favorite`,
+      undefined,
+      options
     );
   }
 
@@ -369,10 +381,10 @@ export const useAddToFavorites = <TError = AxiosError<unknown>,
 export const removeFromFavorites = (
     itemId: MaybeRef<number>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<RemoveFromFavorites200>> => {
-    itemId = unref(itemId);
-    
+    const resolvedItemId = unref(itemId);
     return axios.default.delete(
-      `/api/items/${itemId}/favorite`,options
+      `/api/items/${resolvedItemId}/favorite`,
+      options
     );
   }
 
@@ -430,10 +442,10 @@ export const useRemoveFromFavorites = <TError = AxiosError<unknown>,
 export const getItemById = (
     itemId: MaybeRef<number>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<GetItemById200>> => {
-    itemId = unref(itemId);
-    
+    const resolvedItemId = unref(itemId);
     return axios.default.get(
-      `/api/items/${itemId}`,options
+      `/api/items/${resolvedItemId}`,
+      options
     );
   }
 
@@ -492,10 +504,10 @@ export function useGetItemById<TData = Awaited<ReturnType<typeof getItemById>>, 
 export const deleteItem = (
     itemId: MaybeRef<number>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<DeleteItem200>> => {
-    itemId = unref(itemId);
-    
+    const resolvedItemId = unref(itemId);
     return axios.default.delete(
-      `/api/items/${itemId}`,options
+      `/api/items/${resolvedItemId}`,
+      options
     );
   }
 
@@ -553,10 +565,10 @@ export const useDeleteItem = <TError = AxiosError<unknown>,
 export const isItemFavorited = (
     itemId: MaybeRef<number>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<IsItemFavorited200>> => {
-    itemId = unref(itemId);
-    
+    const resolvedItemId = unref(itemId);
     return axios.default.get(
-      `/api/items/${itemId}/is-favorite`,options
+      `/api/items/${resolvedItemId}/is-favorite`,
+      options
     );
   }
 
@@ -615,10 +627,9 @@ export function useIsItemFavorited<TData = Awaited<ReturnType<typeof isItemFavor
 export const getUserItems = (
      options?: AxiosRequestConfig
  ): Promise<AxiosResponse<GetUserItems200>> => {
-    
-    
     return axios.default.get(
-      `/api/items/user`,options
+      '/api/items/user',
+      options
     );
   }
 
@@ -677,12 +688,13 @@ export function useGetUserItems<TData = Awaited<ReturnType<typeof getUserItems>>
 export const getImage = (
     filename: MaybeRef<string>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<Blob>> => {
-    filename = unref(filename);
-    
+    const resolvedFilename = unref(filename);
     return axios.default.get(
-      `/api/items/images/${filename}`,{
+      `/api/items/images/${resolvedFilename}`,
+      {
         responseType: 'blob',
-    ...options,}
+        ...options,
+      }
     );
   }
 
@@ -741,10 +753,9 @@ export function useGetImage<TData = Awaited<ReturnType<typeof getImage>>, TError
 export const getUserFavorites = (
      options?: AxiosRequestConfig
  ): Promise<AxiosResponse<GetUserFavorites200>> => {
-    
-    
     return axios.default.get(
-      `/api/items/favorites`,options
+      '/api/items/favorites',
+      options
     );
   }
 
@@ -803,10 +814,10 @@ export function useGetUserFavorites<TData = Awaited<ReturnType<typeof getUserFav
 export const getItemsByCategory = (
     categoryId: MaybeRef<number>, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<ItemResponseDTO[]>> => {
-    categoryId = unref(categoryId);
-    
+    const resolvedCategoryId = unref(categoryId);
     return axios.default.get(
-      `/api/items/category/${categoryId}`,options
+      `/api/items/category/${resolvedCategoryId}`,
+      options
     );
   }
 

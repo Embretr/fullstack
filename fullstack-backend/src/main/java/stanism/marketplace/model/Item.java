@@ -14,6 +14,7 @@ import jakarta.persistence.Column;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Entity class representing an item in the marketplace.
@@ -80,27 +81,31 @@ public class Item {
     /** Set of images associated with the item. */
     @OneToMany(mappedBy = "item")
     @JsonIgnore
-    private Set<Image> images;
+    private Set<Image> images = new HashSet<>();
 
     /** Set of users who have favorited this item. */
     @OneToMany(mappedBy = "item")
     @JsonIgnore
-    private Set<Favorite> favorites;
+    private Set<Favorite> favorites = new HashSet<>();
 
     /** Set of messages related to this item. */
     @OneToMany(mappedBy = "item")
     @JsonIgnore
-    private Set<Message> messages;
+    private Set<Message> messages = new HashSet<>();
 
     /** Set of orders associated with this item. */
     @OneToMany(mappedBy = "item")
     @JsonIgnore
-    private Set<Order> orders;
+    private Set<Order> orders = new HashSet<>();
 
     /**
      * Default constructor for JPA.
      */
     public Item() {
+        this.images = new HashSet<>();
+        this.favorites = new HashSet<>();
+        this.messages = new HashSet<>();
+        this.orders = new HashSet<>();
     }
 
     /**
