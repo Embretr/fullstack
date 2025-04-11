@@ -3,7 +3,7 @@
     <template #header>
       <div class="item-image-container">
         <img
-          :src="item.imageUrls?.[0] || 'default-image-url.jpg'"
+          :src="getImageUrl(item.imageUrls?.[0] || '')"
           :alt="item.title"
           class="item-image"
         />
@@ -22,6 +22,7 @@
 
 <script setup lang="ts">
 import Card from './Card.vue'
+import { getImageUrl } from '@/utils/imageUtils'
 
 interface Item {
   id?: number
